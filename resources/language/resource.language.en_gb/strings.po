@@ -1,6 +1,6 @@
 # Kodi Media Center language file
-# Addon Name: TGDB scraper for AEL
-# Addon id: metadata.ael.tgdb
+# Addon Name: Advanced Emulator Launcher : Default plugins
+# Addon id: script.ael.defaults
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -12,7 +12,7 @@ msgstr ""
 # Settings categories
 ############################
 msgctxt "#30010"
-msgid "General"
+msgid "Launching"
 msgstr "settings.xml"
 
 msgctxt "#30011"
@@ -22,8 +22,36 @@ msgstr "settings.xml"
 ############################
 # Settings options
 ############################
-msgctxt "#30101"
-msgid "TheGamesDB API key"
+msgctxt "#30121"
+msgid "Action on Kodi playing media"
+msgstr "settings.xml"
+
+msgctxt "#30122"
+msgid "After/before launch delay (ms)"
+msgstr "settings.xml"
+
+msgctxt "#30123"
+msgid "Suspend/resume Kodi audio engine"
+msgstr "settings.xml"
+
+msgctxt "#30124"
+msgid "Suspend/resume Kodi screensaver"
+msgstr "settings.xml"
+
+msgctxt "#30125"
+msgid "Escape $rom$ quotes"
+msgstr "settings.xml"
+
+msgctxt "#30126"
+msgid "Disable LIRC (Linux only)"
+msgstr "settings.xml"
+
+msgctxt "#30127"
+msgid "Close file descriptors (Windows only)"
+msgstr "settings.xml"
+
+msgctxt "#30128"
+msgid "CD into aplication dir (Windows only)"
 msgstr "settings.xml"
 
 msgctxt "#30129"
@@ -33,6 +61,18 @@ msgstr "settings.xml"
 ############################
 # Enum values
 ############################
+msgctxt "#30901"
+msgid "Stop"
+msgstr "PlayAction ENUM"
+
+msgctxt "#30902"
+msgid "Pause"
+msgstr "PlayAction ENUM"
+
+msgctxt "#30903"
+msgid "Let Play"
+msgstr "PlayAction ENUM"
+
 msgctxt "#30911"
 msgid "ERROR"
 msgstr "LOG ENUM"

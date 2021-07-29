@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Advanced Emulator Launcher: Base launchers
+# Advanced Emulator Launcher: Default scraper implementation
 #
 # Copyright (c) 2016-2018 Wintermute0110 <wintermute0110@gmail.com>
 #
@@ -18,311 +18,237 @@ from __future__ import unicode_literals
 from __future__ import division
 
 import logging
-import collections
-import typing
-
-import xbmcaddon
+import re
+import os
 
 # --- AEL packages ---
-from ael.utils import io, kodi
-from ael.settings import *
-from ael.executors import *
-from ael.launchers import *
+from ael import constants, platforms
+from ael.utils import io, text
+from ael.scrapers import Scraper
 
 logger = logging.getLogger(__name__)
 
-# -------------------------------------------------------------------------------------------------
-# Read RetroarchLauncher.md
-# -------------------------------------------------------------------------------------------------
-class RetroarchLauncher(LauncherABC):
+# ------------------------------------------------------------------------------------------------
+# AEL offline metadata scraper.
+# ------------------------------------------------------------------------------------------------
+class AEL_Offline_Scraper(Scraper):
+    # --- Class variables ------------------------------------------------------------------------
+    supported_metadata_list = [
+        constants.META_TITLE_ID,
+        constants.META_YEAR_ID,
+        constants.META_GENRE_ID,
+        constants.META_DEVELOPER_ID,
+        constants.META_NPLAYERS_ID,
+        constants.META_ESRB_ID,
+        constants.META_PLOT_ID,
+    ]
+
+    # --- Constructor ----------------------------------------------------------------------------
+    # @param settings: [dict] Addon settings. Particular scraper settings taken from here.
+    def __init__(self, settings):
+        # --- This scraper settings ---
+        self.addon_dir = settings['scraper_aeloffline_addon_code_dir']
+        logger.debug('AEL_Offline_Scraper.__init__() Setting addon dir "{}"'.format(self.addon_dir))
+
+        # --- Cached TGDB metadata ---
+        self._reset_cached_games()
+
+        # --- Pass down common scraper settings ---
+        super(AEL_Offline_Scraper, self).__init__(settings)
+
+    def get_id(self):
+        return constants.SCRAPER_AEL_OFFLINE_ID
     
-    def __init__(self, 
-        executorFactory: ExecutorFactoryABC, 
-        execution_settings: ExecutionSettings,
-        launcher_settings: dict):
-        super(RetroarchLauncher, self).__init__(executorFactory, execution_settings, launcher_settings)
+    # --- Base class abstract methods ------------------------------------------------------------
+    def get_name(self): return 'AEL Offline'
 
-    # --------------------------------------------------------------------------------------------
-    # Core functions
-    # --------------------------------------------------------------------------------------------
-    def get_name(self) -> str: return 'Retroarch Launcher'
-    
-    def get_launcher_addon_id(self) -> str: 
-        addon = xbmcaddon.Addon()
-        addon_id = addon.getAddonInfo('id')
-        return addon_id
+    def get_filename(self): return 'AEL_Offline_Scraper'
 
-    # --------------------------------------------------------------------------------------------
-    # Launcher build wizard methods
-    # --------------------------------------------------------------------------------------------
-    #
-    # Creates a new launcher using a wizard of dialogs.
-    #
-    def _builder_get_wizard(self, wizard):
-        logger.debug('RetroarchLauncher::_builder_get_wizard() Starting ...')
-        wizard = kodi.WizardDialog_Dummy(wizard, 'application', self._builder_get_retroarch_app_folder())
-        wizard = kodi.WizardDialog_FileBrowse(wizard, 'application', 'Select the Retroarch path',
-            0, '')
-        wizard = kodi.WizardDialog_DictionarySelection(wizard, 'retro_config', 'Select the configuration',
-            self._builder_get_available_retroarch_configurations)
-        wizard = kodi.WizardDialog_FileBrowse(wizard, 'retro_config', 'Select the configuration',
-            0, '', None, self._builder_user_selected_custom_browsing)
-        wizard = kodi.WizardDialog_DictionarySelection(wizard, 'retro_core_info', 'Select the core',
-            self._builder_get_available_retroarch_cores, self._builder_load_selected_core_info)
-        wizard = kodi.WizardDialog_Keyboard(wizard, 'retro_core_info', 'Enter path to core file',
-            self._builder_load_selected_core_info, self._builder_user_selected_custom_browsing)
-        wizard = kodi.WizardDialog_Dummy(wizard, 'args', self._builder_get_default_retroarch_arguments())
-        wizard = kodi.WizardDialog_Keyboard(wizard, 'args', 'Extra application arguments')
+    def supports_disk_cache(self): return False
 
-        return wizard
+    def supports_search_string(self): return False
 
-    #
-    # In all platforms except Android:
-    #   1) Check if user has configured the Retroarch executable, cores and system dir.
-    #   2) Check if user has configured the Retroarch cores dir.
-    #   3) Check if user has configured the Retroarch system dir.
-    #
-    # In Android:
-    #   1) ...
-    #
-    # If any condition fails abort Retroarch launcher creation.
-    #
-    def _build_pre_wizard_hook(self):
-        logger.debug('RetroarchLauncher::_build_pre_wizard_hook() Starting ...')
-        return True
+    def supports_metadata_ID(self, metadata_ID):
+        #TODO: return True if metadata_ID in ScreenScraper.supported_metadata_list else False
+        return False
 
-    def _build_post_wizard_hook(self):
-        logger.debug('RetroarchLauncher::_build_post_wizard_hook() Starting ...')
-        core = self.launcher_settings['retro_core_info']
-        core_FN = io.FileName(core)        
-        self.launcher_settings['secname'] = core_FN.getBaseNoExt()
-        return super(RetroarchLauncher, self)._build_post_wizard_hook()
+    def supports_metadata(self): return True
 
-    def _builder_get_retroarch_app_folder(self):
+    def supports_asset_ID(self, asset_ID): return False
 
-        retroarch_dir = getSetting('retroarch_system_dir')
-        if retroarch_dir != '':        
-            # --- All platforms except Android ---
-            retroarch_folder = io.FileName(retroarch_dir, isdir = True)
-            if retroarch_folder.exists():
-                logger.debug('Preset Retroarch directory: {}'.format(retroarch_folder.getPath()))
-                return retroarch_folder.getPath()
+    def supports_assets(self): return False
 
-        if io.is_android():
-            # --- Android ---
-            android_retroarch_folders = [
-                '/storage/emulated/0/Android/data/com.retroarch/',
-                '/data/data/com.retroarch/',
-                '/storage/sdcard0/Android/data/com.retroarch/',
-                '/data/user/0/com.retroarch'
-            ]
-            for retroach_folder_path in android_retroarch_folders:
-                logger.debug('_builder_get_retroarch_app_folder() Android testing dir:{}'.format(retroach_folder_path))
-                retroarch_folder = io.FileName(retroach_folder_path)
-                if retroarch_folder.exists():
-                    logger.debug('Preset Retroarch directory: {}'.format(retroarch_folder.getPath()))
-                    return retroarch_folder.getPath()
+    def check_before_scraping(self, status_dic): return status_dic
 
-        logger.debug('No Retroarch directory preset')
-        return '/'
+    # Search term is always None for this scraper.
+    def get_candidates(self, search_term, rom_FN:io.FileName, rom_checksums_FN, platform, status_dic):
+        # AEL Offline cannot be disabled.
+        # Prepare data for scraping.
+        rombase_noext = rom_FN.getBase_noext()
+        logger.debug('AEL_Offline_Scraper.get_candidates() rombase_noext "{}"'.format(rombase_noext))
+        logger.debug('AEL_Offline_Scraper.get_candidates() AEL platform  "{}"'.format(platform))
 
-    def _builder_get_available_retroarch_configurations(self, item_key, launcher):
-        configs = collections.OrderedDict()
-        configs['BROWSE'] = 'Browse for configuration'
+        # If not cached XML data found (maybe offline scraper does not exist for this platform or 
+        # cannot be loaded) return an empty list of candidates.
+        self._initialise_platform(platform)
+        if not self.cached_games: return []
 
-        retroarch_folders:typing.List[io.FileName] = []
-        retroarch_folders.append(io.FileName(launcher['application']))
-
-        if io.is_android():
-            retroarch_folders.append(io.FileName('/storage/emulated/0/Android/data/com.retroarch/'))
-            retroarch_folders.append(io.FileName('/data/data/com.retroarch/'))
-            retroarch_folders.append(io.FileName('/storage/sdcard0/Android/data/com.retroarch/'))
-            retroarch_folders.append(io.FileName('/data/user/0/com.retroarch/'))
-
-        for retroarch_folder in retroarch_folders:
-            logger.debug("get_available_retroarch_configurations() scanning path '{0}'".format(retroarch_folder.getPath()))
-            files = retroarch_folder.recursiveScanFilesInPath('*.cfg')
-            if len(files) < 1: continue
-            for file in files:
-                logger.debug("get_available_retroarch_configurations() adding config file '{0}'".format(file.getPath()))
-                configs[file.getPath()] = file.getBaseNoExt()
-
-            return configs
-
-        return configs
-
-    def _builder_get_available_retroarch_cores(self, item_key, launcher):
-        cores_sorted = collections.OrderedDict()
-        cores_ext = ''
-
-        if io.is_windows():
-            cores_ext = 'dll'
+        if platform == 'MAME':
+            # --- Search MAME games ---
+            candidate_list = self._get_MAME_candidates(rombase_noext, platform)
         else:
-            cores_ext = 'so'
+            # --- Search No-Intro games ---
+            candidate_list = self._get_NoIntro_candidates(rombase_noext, platform)
 
-        config_file = io.FileName(launcher['retro_config'])
-        if not config_file.exists():
-            logger.warning('Retroarch config file not found: {}'.format(config_file.getPath()))
-            kodi.notify_error('Retroarch config file not found {}. Change path first.'.format(config_file.getPath()))
-            return cores_sorted
+        return candidate_list
 
-        parent_dir    = io.FileName(config_file.getDir())
-        configuration = config_file.readPropertyFile()
+    def get_metadata(self, status_dic):
+        gamedata = self._new_gamedata_dic()
 
-        info_folder   = self._create_path_from_retroarch_setting(configuration['libretro_info_path'], parent_dir)
-        cores_folder  = self._create_path_from_retroarch_setting(configuration['libretro_directory'], parent_dir)
-        logger.debug("get_available_retroarch_cores() scanning path '{0}'".format(cores_folder.getPath()))
-
-        if not info_folder.exists():
-            logger.warning('Retroarch info folder not found {}'.format(info_folder.getPath()))
-            kodi.notify_error('Retroarch info folder not found {}. Read documentation'.format(info_folder.getPath()))
-            return cores_sorted
-    
-        # scan based on info folder and files since Retroarch on Android has it's core files in 
-        # the app folder which is not readable without root privileges. Changing the cores folder
-        # will not work since Retroarch won't be able to load cores from a different folder due
-        # to security reasons. Changing that setting under Android will only result in a reset 
-        # of that value after restarting Retroarch ( https://forums.libretro.com/t/directory-settings-wont-save/12753/3 )
-        # So we will scan based on info files (which setting path can be changed) and guess that
-        # the core files will be available.
-        cores = {}
-        files = info_folder.scanFilesInPath('*.info')
-        for info_file in files:
-            
-            if info_file.getBaseNoExt() == '00_example_libretro':
-                continue
-                
-            logger.debug("get_available_retroarch_cores() adding core using info '{0}'".format(info_file.getPath()))    
-
-            # check if core exists, if android just skip and guess it exists
-            if not io.is_android():
-                core_file = self._switch_info_to_core_file(info_file, cores_folder, cores_ext)
-                if not core_file.exists():
-                    logger.warning('get_available_retroarch_cores() Cannot find "{}". Skipping info "{}"'.format(core_file.getPath(), info_file.getBase()))
-                    continue
-                logger.debug("get_available_retroarch_cores() using core '{0}'".format(core_file.getPath()))
-                
-            core_info = info_file.readPropertyFile()
-            cores[info_file.getPath()] = core_info['display_name']
-
-        cores_sorted['BROWSE'] = 'Manual enter path to core'        
-        for core_item in sorted(cores.items(), key=lambda x: x[1]):
-            cores_sorted[core_item[0]] = core_item[1]
-        return cores_sorted
-
-    def _builder_load_selected_core_info(self, input:str, item_key, launcher, ask_overwrite=False):
-        if input == 'BROWSE':
-            return input
-
-        if io.is_windows():
-            cores_ext = 'dll'
+        if self.cached_platform == 'MAME':
+            key_id = self.candidate['id']
+            logger.debug("AEL_Offline_Scraper.get_metadata() Mode MAME id = '{}'".format(key_id))
+            gamedata['title']     = self.cached_games[key_id]['title']
+            gamedata['year']      = self.cached_games[key_id]['year']
+            gamedata['genre']     = self.cached_games[key_id]['genre']
+            gamedata['developer'] = self.cached_games[key_id]['developer']
+            gamedata['nplayers']  = self.cached_games[key_id]['nplayers']
+        elif self.cached_platform == 'Unknown':
+            # Unknown platform. Behave like NULL scraper
+            logger.debug("AEL_Offline_Scraper.get_metadata() Mode Unknown. Doing nothing.")
         else:
-            cores_ext = 'so'
+            # No-Intro scraper by default.
+            key_id = self.candidate['id']
+            logger.debug("AEL_Offline_Scraper.get_metadata() Mode No-Intro id = '{}'".format(key_id))
+            gamedata['title']     = self.cached_games[key_id]['title']
+            gamedata['year']      = self.cached_games[key_id]['year']
+            gamedata['genre']     = self.cached_games[key_id]['genre']
+            gamedata['developer'] = self.cached_games[key_id]['developer']
+            gamedata['nplayers']  = self.cached_games[key_id]['nplayers']
+            gamedata['esrb']      = self.cached_games[key_id]['rating']
+            gamedata['plot']      = self.cached_games[key_id]['plot']
 
-        if input.endswith(cores_ext):
-            core_file = io.FileName(input)
-            launcher['retro_core']  = core_file.getPath()
-            return input
+        return gamedata
 
-        config_file     = io.FileName(launcher['retro_config'])
-        parent_dir      = io.FileName(config_file.getDir())
-        configuration   = config_file.readPropertyFile()
-        cores_folder    = self._create_path_from_retroarch_setting(configuration['libretro_directory'], parent_dir)
-        info_file       = io.FileName(input)
+    def get_assets(self, asset_info, status_dic): return []
+
+    def resolve_asset_URL(self, selected_asset, status_dic): pass
+
+    def resolve_asset_URL_extension(self, selected_asset, image_url, status_dic): pass
         
-        core_file = self._switch_info_to_core_file(info_file, cores_folder, cores_ext)
-        core_info = info_file.readPropertyFile()
+    # --- This class own methods -----------------------------------------------------------------
+    def _get_MAME_candidates(self, rombase_noext, platform):
+        logger.debug("AEL_Offline_Scraper._get_MAME_candidates() Scraper working in MAME mode.")
 
-        launcher[item_key]      = info_file.getPath()
-        launcher['retro_core']  = core_file.getPath()
-        
-        if ask_overwrite and not kodi.dialog_yesno('Do you also want to overwrite previous settings for platform, developer etc.'):
-            return input
-        
-        launcher['romext']      = core_info['supported_extensions']
-        launcher['platform']    = core_info['systemname']
-        launcher['m_developer'] = core_info['manufacturer']
-        launcher['m_name']      = core_info['systemname']
-
-        return input
-
-    def _builder_get_default_retroarch_arguments(self):
-        args = ''
-        if io.is_android():
-            args += '-e IME com.android.inputmethod.latin/.LatinIME -e REFRESH 60'
-
-        return args
-    
-    # ---------------------------------------------------------------------------------------------
-    # Execution methods
-    # ---------------------------------------------------------------------------------------------
-    def get_application(self) -> str:
-        application = ''
-        if io.is_windows():
-            app = io.FileName(self.launcher_settings['application'])
-            app = app.append('retroarch.exe') 
-            application = app.getPath()
-            
-        if io.is_android():
-            application = '/system/bin/am'
-
-        # TODO other os
-        return application
-
-    def get_execution_ready_arguments(self, rom_arguments: dict) -> str:
-        arguments = super(RetroarchLauncher, self).get_execution_ready_arguments(rom_arguments)
-        execution_arguments = ''
-        if io.is_windows() or io.is_linux():
-            execution_arguments =  '-L "{}" '.format(self.launcher_settings['retro_core'])
-            execution_arguments += '-c "{}" '.format(self.launcher_settings['retro_config'])
-            execution_arguments += '"{}"'.format(rom_arguments['file'])
-            execution_arguments += arguments
-
-        if io.is_android():
-            android_app_path = self.launcher_settings['application']
-            android_app = next(s for s in reversed(android_app_path.split('/')) if s)
-
-            execution_arguments =  'start --user 0 -a android.intent.action.MAIN -c android.intent.category.LAUNCHER '
-
-            execution_arguments += '-n {}/com.retroarch.browser.retroactivity.RetroActivityFuture '.format(android_app)
-            execution_arguments += '-e ROM \'{}\' '.format(rom_arguments['file'])
-            execution_arguments += '-e LIBRETRO {} '.format(self.launcher_settings['retro_core'])
-            execution_arguments += '-e CONFIGFILE {} '.format(self.launcher_settings['retro_config'])
-            execution_arguments += arguments
-        
-        # TODO: other OSes        
-        return execution_arguments
-    
-    # ---------------------------------------------------------------------------------------------
-    # Misc methods
-    # ---------------------------------------------------------------------------------------------    
-    def _create_path_from_retroarch_setting(self, path_from_setting:str, parent_dir:io.FileName):
-        if path_from_setting.startswith(':\\'):
-            path_from_setting = path_from_setting[2:]
-            return parent_dir.pjoin(path_from_setting, isdir=True)
+        # --- MAME rombase_noext is exactly the rom name ---
+        # MAME offline scraper either returns one candidate game or nothing at all.
+        rom_base_noext_lower = rombase_noext.lower()
+        if rom_base_noext_lower in self.cached_games:
+            candidate = self._new_candidate_dic()
+            candidate['id'] = self.cached_games[rom_base_noext_lower]['ROM']
+            candidate['display_name'] = self.cached_games[rom_base_noext_lower]['title']
+            candidate['platform'] = platform
+            candidate['scraper_platform'] = platform
+            candidate['order'] = 1
+            return [candidate]
         else:
-            folder = io.FileName(path_from_setting, isdir=True)
-            # if '/data/user/0/' in folder.getPath():
-            #     alternative_folder = folder.getPath()
-            #     alternative_folder = alternative_folder.replace('/data/user/0/', '/data/data/')
-            #     folder = FileName(alternative_folder, isdir=True)
-            return folder
+            return []
 
-    def _switch_core_to_info_file(self, core_file, info_folder:io.FileName):
-        info_file = core_file.changeExtension('info')
-   
-        if io.is_android():
-            info_file = info_folder.pjoin(info_file.getBase().replace('_android', ''))
+    def _get_NoIntro_candidates(self, rombase_noext, platform):
+        # --- First try an exact match using rombase_noext ---
+        logger.debug("AEL_Offline_Scraper._get_NoIntro_candidates() Scraper working in No-Intro mode.")
+        logger.debug("AEL_Offline_Scraper._get_NoIntro_candidates() Trying exact search for '{}'".format(
+            rombase_noext))
+        candidate_list = []
+        if rombase_noext in self.cached_games:
+            logger.debug("AEL_Offline_Scraper._get_NoIntro_candidates() Exact match found.")
+            candidate = self._new_candidate_dic()
+            candidate['id'] = rombase_noext
+            candidate['display_name'] = self.cached_games[rombase_noext]['ROM']
+            candidate['platform'] = platform
+            candidate['scraper_platform'] = platform
+            candidate['order'] = 1
+            candidate_list.append(candidate)
         else:
-            info_file = info_folder.pjoin(info_file.getBase())
+            # --- If nothing found, do a fuzzy search ---
+            # Here implement a Levenshtein distance algorithm.
+            search_term = text.format_ROM_name_for_scraping(rombase_noext)
+            logger.debug("AEL_Offline_Scraper._get_NoIntro_candidates() No exact match found.")
+            logger.debug("AEL_Offline_Scraper._get_NoIntro_candidates() Trying fuzzy search '{}'".format(
+                search_term))
+            search_string_lower = rombase_noext.lower()
+            regexp = '.*{}.*'.format(search_string_lower)
+            try:
+                # Sometimes this produces: raise error, v # invalid expression
+                p = re.compile(regexp)
+            except:
+                logger.info('AEL_Offline_Scraper._get_NoIntro_candidates() Exception in re.compile(regexp)')
+                logger.info('AEL_Offline_Scraper._get_NoIntro_candidates() regexp = "{}"'.format(regexp))
+                return []
 
-        return info_file
+            for key in self.cached_games:
+                this_game_name = self.cached_games[key]['ROM']
+                this_game_name_lower = this_game_name.lower()
+                match = p.match(this_game_name_lower)
+                if not match: continue
+                # --- Add match to candidate list ---
+                candidate = self._new_candidate_dic()
+                candidate['id'] = self.cached_games[key]['ROM']
+                candidate['display_name'] = self.cached_games[key]['ROM']
+                candidate['platform'] = platform
+                candidate['scraper_platform'] = platform
+                candidate['order'] = 1
+                # If there is an exact match of the No-Intro name put that candidate game first.
+                if search_term == this_game_name:                         candidate['order'] += 1
+                if rombase_noext == this_game_name:                       candidate['order'] += 1
+                if self.cached_games[key]['ROM'].startswith(search_term): candidate['order'] += 1
+                candidate_list.append(candidate)
+            candidate_list.sort(key = lambda result: result['order'], reverse = True)
 
-    def _switch_info_to_core_file(self, info_file, cores_folder, cores_ext):
-        core_file = info_file.changeExtension(cores_ext)
-        if io.is_android():
-            core_file = cores_folder.pjoin(core_file.getBase().replace('.', '_android.'))
+        return candidate_list
+
+    # Load XML database and keep it cached in memory.
+    def _initialise_platform(self, platform):
+        # Check if we have data already cached in object memory for this platform
+        if self.cached_platform == platform:
+            logger.debug('AEL_Offline_Scraper._initialise_platform() platform = "{}" is cached in object.'.format(
+                platform))
+            return
         else:
-            core_file = cores_folder.pjoin(core_file.getBase())
+            logger.debug('AEL_Offline_Scraper._initialise_platform() platform = "{}" not cached. Loading XML.'.format(
+                platform))
 
-        return core_file
+        # What if platform is not in the official list dictionary?
+        # Then load nothing and behave like the NULL scraper.
+        if platform in platforms.platform_long_to_index_dic:
+            # Check for aliased platforms
+            pobj = platforms.AEL_platforms[platforms.platform_long_to_index_dic[platform]]
+            if pobj.aliasof:
+                logger.debug('AEL_Offline_Scraper._initialise_platform() Aliased platform. Using parent XML.')
+                parent_pobj = platforms.AEL_platforms[platforms.platform_compact_to_index_dic[pobj.aliasof]]
+                xml_file = 'data-AOS/' + parent_pobj.long_name + '.xml'
+            else:
+                xml_file = 'data-AOS/' + platform + '.xml'
+
+        else:
+            logger.debug('AEL_Offline_Scraper._initialise_platform() Platform "{}" not found'.format(platform))
+            logger.debug('AEL_Offline_Scraper._initialise_platform() Defaulting to Unknown')
+            self._reset_cached_games()
+            return
+
+        # Load XML database and keep it in memory for subsequent calls
+        xml_path = os.path.join(self.addon_dir, xml_file)
+        # logger.debug('AEL_Offline_Scraper._initialise_platform() Loading XML {}'.format(xml_path))
+        self.cached_games = audit_load_OfflineScraper_XML(xml_path)
+        if not self.cached_games:
+            self._reset_cached_games()
+            return
+        self.cached_xml_path = xml_path
+        self.cached_platform = platform
+        logger.debug('AEL_Offline_Scraper._initialise_platform() cached_xml_path = {}'.format(self.cached_xml_path))
+        logger.debug('AEL_Offline_Scraper._initialise_platform() cached_platform = {}'.format(self.cached_platform))
+
+    def _reset_cached_games(self):
+        self.cached_games = {}
+        self.cached_xml_path = ''
+        self.cached_platform = 'Unknown'
