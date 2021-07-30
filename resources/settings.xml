@@ -84,6 +84,18 @@
                     <level>4</level>
                     <default>LAUNCHER|SCRAPER|SCANNER</default>
                 </setting>
+                <setting id="ael.launcher.friendlyname" type="string" label="Launcher friendlyname" help="">
+                    <level>4</level>
+                    <default>Application launcher</default>
+                </setting>
+                <setting id="ael.scanner.friendlyname" type="string" label="Scanner friendlyname" help="">
+                    <level>4</level>
+                    <default>Folder scanner</default>
+                </setting>
+                <setting id="ael.scraper.friendlyname" type="string" label="Scraper friendlyname" help="">
+                    <level>4</level>
+                    <default>AEL offline scraper</default>
+                </setting>
                 <setting id="ael.scraper.supported_types" type="string" label="Types supported by this scraper" help="">
                     <level>4</level>
                     <default>metadata|fanart|banner</default>
