@@ -142,14 +142,14 @@ def scan_for_roms(args):
     scanner.scan()
     progress_dialog.endProgress()
     
-    logger.debug('vw_execute_folder_scanner(): Finished scanning')
+    logger.debug('scan_for_roms(): Finished scanning')
     
     amount_scanned = scanner.amount_of_scanned_roms()
     if amount_scanned == 0:
-        logger.info('vw_execute_folder_scanner(): No roms scanned')
+        logger.info('scan_for_roms(): No roms scanned')
         return
         
-    logger.info('vw_execute_folder_scanner(): {} roms scanned'.format(amount_scanned))
+    logger.info('scan_for_roms(): {} roms scanned'.format(amount_scanned))
     scanner.store_scanned_roms(args.romcollection_id, args.scanner_id)
     kodi.notify('ROMs scanning done')
 
