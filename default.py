@@ -79,10 +79,10 @@ def run_plugin():
 # ---------------------------------------------------------------------------------------------
 # Launcher methods.
 # ---------------------------------------------------------------------------------------------
-# Arguments: --settings (json) --rom_args (json) --launcher_id --rom_id --server_host --server_port
+# Arguments: --rom_args (json) --launcher_id --rom_id
 def launch_rom(args):
     logger.debug('App Launcher: Starting ...')
-    rom_arguments       = json.loads(args.rom_args)
+    rom_arguments = json.loads(args.rom_args)
     try:
         execution_settings = ExecutionSettings()
         execution_settings.delay_tempo              = settings.getSettingAsInt('delay_tempo')
@@ -99,47 +99,47 @@ def launch_rom(args):
         
         executor_factory = get_executor_factory(report_path)
         launcher = AppLauncher(executor_factory, execution_settings, args.server_host, args.server_port)
-        launcher.load_launcher_settings(args.rom_id, args.launcher_id)
+        launcher.load_settings(None, args.rom_id, args.launcher_id)
         launcher.launch(rom_arguments)
     except Exception as e:
         logger.error('Exception while executing ROM', exc_info=e)
         kodi.notify_error('Failed to execute ROM')    
 
-# Arguments: --settings (json) --launcher_id --romcollection_id
+# Arguments: --launcher_id --romcollection_id | --rom_id
 def configure_launcher(args):
     logger.debug('App Launcher: Configuring ...')
         
     launcher = AppLauncher(None, None, args.server_host, args.server_port)
+    launcher.load_settings(args.romcollection_id, args.rom_id, args.launcher_id)
     
-    if args.launcher_id is not None:
-        launcher.load_launcher_settings(args.romcollection_id, args.rom_id, args.launcher_id)
-        if launcher.edit():
-            launcher.store_launcher_settings(args.romcollection_id, args.rom_id, args.launcher_id)
-            return
-    else:
-        if launcher.build():
-            launcher.store_launcher_settings(args.romcollection_id, args.rom_id,)
-            return
+    if args.launcher_id is None and launcher.build():
+        launcher.store_settings(args.romcollection_id, args.rom_id, args.launcher_id)
+        return
+    
+    if args.launcher_id is not None and launcher.edit():
+        launcher.store_settings(args.romcollection_id, args.rom_id, args.launcher_id)
+        return
     
     kodi.notify_warn('Cancelled creating launcher')
 
 # ---------------------------------------------------------------------------------------------
 # Scanner methods.
 # ---------------------------------------------------------------------------------------------
-# Arguments: --settings (json) --scanner_id --romcollection_id --server_host --server_port
+# Arguments: --scanner_id --romcollection_id --server_host --server_port
 def scan_for_roms(args):
     logger.debug('ROM Folder scanner: Starting scan ...')
-    scanner_settings = json.loads(args.settings) if args.settings else None
     progress_dialog = kodi.ProgressDialog()
 
     addon_dir = kodi.getAddonDir()
     report_path = addon_dir.pjoin('reports')
             
     scanner = RomFolderScanner(
-        report_path,
-        scanner_settings,
-        None,
+        report_path, 
+        args.server_host, 
+        args.server_port, 
         progress_dialog)
+    
+    scanner.load_settings(args.romcollection_id, args.scanner_id)
     
     scanner.scan()
     progress_dialog.endProgress()
@@ -155,23 +155,17 @@ def scan_for_roms(args):
     scanner.store_scanned_roms(args.romcollection_id, args.scanner_id)
     kodi.notify('ROMs scanning done')
 
-# Arguments: --settings (json) --scanner_id (opt) --romcollection_id --launcher_settings (opt)
+# Arguments: --scanner_id (opt) --romcollection_id
 def configure_scanner(args):
     logger.debug('ROM Folder scanner: Configuring ...')    
-    scanner_settings = json.loads(args.settings) if args.settings else None
-    launcher_settings = json.loads(args.launcher_settings) if args.launcher_settings else None
-    
     addon_dir = kodi.getAddonDir()
     report_path = addon_dir.pjoin('reports')
     
-    scanner = RomFolderScanner(
-        report_path, 
-        scanner_settings,
-        launcher_settings,
-        kodi.ProgressDialog())
+    scanner = RomFolderScanner(report_path, args.server_host, args.server_port, kodi.ProgressDialog())
+    scanner.load_settings(args.romcollection_id, args.scanner_id)
     
     if scanner.configure():
-        scanner.store_scanner_settings(args.romcollection_id, args.scanner_id)
+        scanner.store_settings(args.romcollection_id, args.scanner_id)
         return
     
     kodi.notify_warn('Cancelled configuring scanner')
