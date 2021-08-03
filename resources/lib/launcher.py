@@ -21,9 +21,7 @@ import logging
 # --- AEL packages ---
 from ael import platforms
 from ael.utils import io, kodi
-
-from ael.executors import ExecutorFactoryABC
-from ael.launchers import LauncherABC, ExecutionSettings
+from ael.launchers import LauncherABC
 
 logger = logging.getLogger(__name__)
 
@@ -32,12 +30,6 @@ logger = logging.getLogger(__name__)
 # Inherit from this base class to implement your own specific ROM App launcher.
 # -------------------------------------------------------------------------------------------------
 class AppLauncher(LauncherABC):
-
-    def __init__(self, 
-        executorFactory: ExecutorFactoryABC, 
-        execution_settings: ExecutionSettings,
-        launcher_settings: dict):
-        super(AppLauncher, self).__init__(executorFactory, execution_settings, launcher_settings)
 
     # --------------------------------------------------------------------------------------------
     # Core methods

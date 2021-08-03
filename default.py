@@ -54,12 +54,10 @@ def run_plugin():
     parser.add_argument('--type',help="Plugin type", choices=['LAUNCHER', 'SCANNER', 'SCRAPER'], default=constants.AddonType.LAUNCHER.name)
     parser.add_argument('--server_host', type=str, help="Host")
     parser.add_argument('--server_port', type=int, help="Port")
-    parser.add_argument('--romcollection_id', type=str, help="ROM Collection ID")
     parser.add_argument('--rom_id', type=str, help="ROM ID")
+    parser.add_argument('--romcollection_id', type=str, help="ROM Collection ID")
     parser.add_argument('--launcher_id', type=str, help="Launcher configuration ID")
     parser.add_argument('--rom_args', type=str)
-    parser.add_argument('--settings', type=str)
-    parser.add_argument('--is_non_blocking', type=bool, default=False)
     
     try:
         args = parser.parse_args()
@@ -81,30 +79,27 @@ def run_plugin():
 # ---------------------------------------------------------------------------------------------
 # Launcher methods.
 # ---------------------------------------------------------------------------------------------
-# Arguments: --settings (json) --rom_args (json) --is_non_blocking --launcher_id --rom_id
+# Arguments: --settings (json) --rom_args (json) --launcher_id --rom_id --server_host --server_port
 def launch_rom(args):
     logger.debug('App Launcher: Starting ...')
-    launcher_settings   = json.loads(args.settings)
     rom_arguments       = json.loads(args.rom_args)
     try:
         execution_settings = ExecutionSettings()
         execution_settings.delay_tempo              = settings.getSettingAsInt('delay_tempo')
         execution_settings.display_launcher_notify  = settings.getSettingAsBool('display_launcher_notify')
-        execution_settings.is_non_blocking          = True if args.is_non_blocking == 'true' else False
+        execution_settings.is_non_blocking          = settings.getSettingAsBool('is_non_blocking')
         execution_settings.media_state_action       = settings.getSettingAsInt('media_state_action')
         execution_settings.suspend_audio_engine     = settings.getSettingAsBool('suspend_audio_engine')
         execution_settings.suspend_screensaver      = settings.getSettingAsBool('suspend_screensaver')
-        
-        rom_obj = api.client_get_rom(args.server_host, args.server_port, args.rom_id)
-        logger.info('API {}'.format(rom_obj.get_name()))
-        
+                
         addon_dir = kodi.getAddonDir()
         report_path = addon_dir.pjoin('reports')
         if not report_path.exists(): report_path.makedirs()    
         report_path = report_path.pjoin('{}-{}.txt'.format(args.launcher_id, args.rom_id))
         
         executor_factory = get_executor_factory(report_path)
-        launcher = AppLauncher(executor_factory, execution_settings, launcher_settings)
+        launcher = AppLauncher(executor_factory, execution_settings, args.server_host, args.server_port)
+        launcher.load_launcher_settings(args.rom_id, args.launcher_id)
         launcher.launch(rom_arguments)
     except Exception as e:
         logger.error('Exception while executing ROM', exc_info=e)
@@ -113,22 +108,25 @@ def launch_rom(args):
 # Arguments: --settings (json) --launcher_id --romcollection_id
 def configure_launcher(args):
     logger.debug('App Launcher: Configuring ...')
-    launcher_settings = json.loads(args.settings)    
-    launcher = AppLauncher(None, None, launcher_settings)
-    if args.launcher_id is None and launcher.build():
-        launcher.store_launcher_settings(args.romcollection_id)
-        return
+        
+    launcher = AppLauncher(None, None, args.server_host, args.server_port)
     
-    if args.launcher_id is not None and launcher.edit():
-        launcher.store_launcher_settings(args.romcollection_id, args.launcher_id)
-        return
+    if args.launcher_id is not None:
+        launcher.load_launcher_settings(args.romcollection_id, args.rom_id, args.launcher_id)
+        if launcher.edit():
+            launcher.store_launcher_settings(args.romcollection_id, args.rom_id, args.launcher_id)
+            return
+    else:
+        if launcher.build():
+            launcher.store_launcher_settings(args.romcollection_id, args.rom_id,)
+            return
     
     kodi.notify_warn('Cancelled creating launcher')
 
 # ---------------------------------------------------------------------------------------------
 # Scanner methods.
 # ---------------------------------------------------------------------------------------------
-# Arguments: --settings (json) --scanner_id --romcollection_id
+# Arguments: --settings (json) --scanner_id --romcollection_id --server_host --server_port
 def scan_for_roms(args):
     logger.debug('ROM Folder scanner: Starting scan ...')
     scanner_settings = json.loads(args.settings) if args.settings else None
