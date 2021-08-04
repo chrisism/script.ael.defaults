@@ -24,7 +24,9 @@ import re
 # --- AEL packages ---
 from ael import report, platforms, settings
 from ael.utils import io, kodi
-from ael.scanners import RomScannerStrategy, ROMCandidateABC, ROMFileCandidate, ROMData, MultiDiscInfo
+from ael.api import ROMObj
+
+from ael.scanners import RomScannerStrategy, ROMCandidateABC, ROMFileCandidate, MultiDiscInfo
 
 logger = logging.getLogger(__name__)
         
@@ -96,7 +98,7 @@ class RomFolderScanner(RomScannerStrategy):
         return [*(ROMFileCandidate(f) for f in files)]
 
     # --- Remove dead entries -----------------------------------------------------------------
-    def _removeDeadRoms(self, candidates: typing.List[ROMCandidateABC], roms: typing.List[ROMData]):
+    def _removeDeadRoms(self, candidates: typing.List[ROMCandidateABC], roms: typing.List[ROMObj]):
         num_roms = len(roms)
         num_removed_roms = 0
         if num_roms == 0:
@@ -127,11 +129,11 @@ class RomFolderScanner(RomScannerStrategy):
     # ~~~ Now go processing item by item ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def _processFoundItems(self, 
                            candidates: typing.List[ROMCandidateABC], 
-                           roms:typing.List[ROMData],
-                           launcher_report: report.Reporter) -> typing.List[ROMData]:
+                           roms:typing.List[ROMObj],
+                           launcher_report: report.Reporter) -> typing.List[ROMObj]:
 
         num_items = len(candidates)    
-        new_roms:typing.List[ROMData] = []
+        new_roms:typing.List[ROMObj] = []
 
         self.progress_dialog.startProgress('Scanning found items', num_items)
         logger.debug('============================== Processing ROMs ==============================')
@@ -245,7 +247,7 @@ class RomFolderScanner(RomScannerStrategy):
             # ~~~~~ Process new ROM and add to the list ~~~~~
             # --- Create new rom dictionary ---
             # >> Database always stores the original (non transformed/manipulated) path
-            new_rom = ROMData()
+            new_rom = ROMObj()
             new_rom.set_file(ROM_file)
                                     
             # checksums
