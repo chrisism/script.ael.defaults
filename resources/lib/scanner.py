@@ -22,9 +22,8 @@ import typing
 import re
 
 # --- AEL packages ---
-from ael import report, platforms, settings
+from ael import report, platforms, settings, api
 from ael.utils import io, kodi
-from ael.api import ROMObj
 
 from ael.scanners import RomScannerStrategy, ROMCandidateABC, ROMFileCandidate, MultiDiscInfo
 
@@ -98,7 +97,7 @@ class RomFolderScanner(RomScannerStrategy):
         return [*(ROMFileCandidate(f) for f in files)]
 
     # --- Remove dead entries -----------------------------------------------------------------
-    def _removeDeadRoms(self, candidates: typing.List[ROMCandidateABC], roms: typing.List[ROMObj]):
+    def _removeDeadRoms(self, candidates: typing.List[ROMCandidateABC], roms: typing.List[api.ROMObj]):
         num_roms = len(roms)
         num_removed_roms = 0
         if num_roms == 0:
@@ -129,11 +128,11 @@ class RomFolderScanner(RomScannerStrategy):
     # ~~~ Now go processing item by item ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def _processFoundItems(self, 
                            candidates: typing.List[ROMCandidateABC], 
-                           roms:typing.List[ROMObj],
-                           launcher_report: report.Reporter) -> typing.List[ROMObj]:
+                           roms:typing.List[api.ROMObj],
+                           launcher_report: report.Reporter) -> typing.List[api.ROMObj]:
 
         num_items = len(candidates)    
-        new_roms:typing.List[ROMObj] = []
+        new_roms:typing.List[api.ROMObj] = []
 
         self.progress_dialog.startProgress('Scanning found items', num_items)
         logger.debug('============================== Processing ROMs ==============================')
@@ -247,7 +246,7 @@ class RomFolderScanner(RomScannerStrategy):
             # ~~~~~ Process new ROM and add to the list ~~~~~
             # --- Create new rom dictionary ---
             # >> Database always stores the original (non transformed/manipulated) path
-            new_rom = ROMObj()
+            new_rom = api.ROMObj()
             new_rom.set_file(ROM_file)
                                     
             # checksums
@@ -294,11 +293,22 @@ class RomFolderScanner(RomScannerStrategy):
         extensions = scanner_settings[item_key] if item_key in scanner_settings else ''
         if extensions != '': return extensions
         
-        if self.default_launcher_settings and 'application' in self.default_launcher_settings:
-            app = self.default_launcher_settings['application'] 
-            appPath = io.FileName(app)
-
-            extensions = platforms.emudata_get_program_extensions(appPath.getBase())
+        if self.romcollection_id:
+            extensions_by_launchers = []
+            launchers = api.client_get_collection_launchers(self.webservice_host, self.webservice_port, self.romcollection_id)
+            for key, launcher_settings in launchers.items():
+                if 'application' not in launcher_settings:
+                    continue
+                app = launcher_settings['application'] 
+                appPath = io.FileName(app)
+                launcher_extensions = platforms.emudata_get_program_extensions(appPath.getBase())
+                if launcher_extensions != '':
+                    extensions_by_launchers.append(launcher_extensions)
+            
+            if len(extensions_by_launchers) > 0:
+                extensions = '|'.join(extensions_by_launchers)
+            else:
+                extensions = ''
             
         return extensions
              
