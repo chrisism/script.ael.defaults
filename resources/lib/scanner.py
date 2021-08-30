@@ -118,6 +118,7 @@ class RomFolderScanner(RomScannerStrategy):
                 logger.debug('Not found')
                 logger.debug('Deleting from DB {0}'.format(fileName.getPath()))
                 roms.remove(rom)
+                self.removed_roms.append(rom)
                 num_removed_roms += 1
             i += 1
             

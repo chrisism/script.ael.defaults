@@ -16,7 +16,7 @@ import json
 import xbmcaddon
 
 # AEL main imports
-from ael import constants, settings, api
+from ael import constants, settings
 from ael.utils import kodilogging, io, kodi
 
 from ael.launchers import ExecutionSettings, get_executor_factory
