@@ -20,6 +20,7 @@ from ael import constants, settings
 from ael.utils import kodilogging, io, kodi
 
 from ael.launchers import ExecutionSettings, get_executor_factory
+from ael.scrapers import ScrapeStrategy, ScraperSettings
 
 # Local modules
 from resources.lib.launcher import AppLauncher
@@ -57,6 +58,7 @@ def run_plugin():
     parser.add_argument('--rom_id', type=str, help="ROM ID")
     parser.add_argument('--romcollection_id', type=str, help="ROM Collection ID")
     parser.add_argument('--ael_addon_id', type=str, help="Addon configuration ID")
+    parser.add_argument('--settings', type=str, help="Specific run setting")
     
     try:
         args = parser.parse_args()
@@ -191,18 +193,31 @@ def configure_scanner(args):
 # ---------------------------------------------------------------------------------------------
 def run_scraper(args):
     logger.debug('Offline scraper: Starting ...')
-    scraper_settings = json.loads(args.settings)
-    rom_dic          = json.loads(args.rom)
-    rom_id           = args.rom_id
-
+    scraper_settings_dict = json.loads(args.settings)
+    
     logger.debug('========== run_scraper() BEGIN ==================================================')
     pdialog             = kodi.ProgressDialog()
-    scraper_strategy    = AEL_Offline_Scraper(scraper_settings)
+    
+    settings            = ScraperSettings.from_settings_dict(scraper_settings_dict)
+    scraper_strategy    = ScrapeStrategy(
+                            args.server_host, 
+                            args.server_port, 
+                            settings, 
+                            AEL_Offline_Scraper(), 
+                            pdialog)
+                        
+    #scraper_strategy    = AEL_Offline_Scraper(scraper_settings)
     # g_ScraperFactory.create_scraper(launcher, pdialog, scraper_settings)
 
+    succeeded = False
+    if args.rom_id is not None:
+        succeeded = scraper_strategy.process_single_rom(args.rom_id)
+    if args.romcollection_id is not None:
+        succeeded = scraper_strategy.process_collection(args.romcollection_id)
+
     # roms = scraper_strategy.scanner_process_launcher(launcher)
-    # pdialog.endProgress()
-    # pdialog.startProgress('Saving ROM JSON database ...')
+    pdialog.endProgress()
+    pdialog.startProgress('Saving ROM JSON database ...')
 
         
 # ---------------------------------------------------------------------------------------------
