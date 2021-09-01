@@ -152,13 +152,18 @@ def scan_for_roms(args):
     
     logger.debug('scan_for_roms(): Finished scanning')
     
+    amount_dead = scanner.amount_of_dead_roms()
+    if amount_dead > 0:
+        logger.info('scan_for_roms(): {} roms marked as dead'.format(amount_dead))
+        scanner.remove_dead_roms()
+        
     amount_scanned = scanner.amount_of_scanned_roms()
     if amount_scanned == 0:
         logger.info('scan_for_roms(): No roms scanned')
-        return
+    else:
+        logger.info('scan_for_roms(): {} roms scanned'.format(amount_scanned))
+        scanner.store_scanned_roms()
         
-    logger.info('scan_for_roms(): {} roms scanned'.format(amount_scanned))
-    scanner.store_scanned_roms()
     kodi.notify('ROMs scanning done')
 
 # Arguments: --ael_addon_id (opt) --romcollection_id

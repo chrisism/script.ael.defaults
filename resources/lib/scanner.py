@@ -96,35 +96,32 @@ class RomFolderScanner(RomScannerStrategy):
         
         return [*(ROMFileCandidate(f) for f in files)]
 
-    # --- Remove dead entries -----------------------------------------------------------------
-    def _removeDeadRoms(self, candidates: typing.List[ROMCandidateABC], roms: typing.List[api.ROMObj]):
+    # --- Get dead entries -----------------------------------------------------------------
+    def _getDeadRoms(self, candidates:typing.List[ROMCandidateABC], roms: typing.List[api.ROMObj]) -> typing.List[api.ROMObj]:
+        dead_roms = []
         num_roms = len(roms)
-        num_removed_roms = 0
         if num_roms == 0:
-            logger.info('Launcher is empty. No dead ROM check.')
-            return num_removed_roms
+            logger.info('Collection is empty. No dead ROM check.')
+            return dead_roms
         
-        logger.debug('Starting dead items scan')
+        logger.info('Starting dead items scan')
         i = 0
             
         self.progress_dialog.startProgress('Checking for dead ROMs ...', num_roms)
             
         for rom in reversed(roms):
             fileName = rom.get_file()
-            logger.debug('Searching {0}'.format(fileName.getPath()))
+            logger.info('Searching {0}'.format(fileName.getPath()))
             self.progress_dialog.updateProgress(i)
             
             if not fileName.exists():
-                logger.debug('Not found')
-                logger.debug('Deleting from DB {0}'.format(fileName.getPath()))
+                logger.info('Not found. Marking as dead: {0}'.format(fileName.getPath()))
                 roms.remove(rom)
-                self.removed_roms.append(rom)
-                num_removed_roms += 1
+                dead_roms.append(rom)
             i += 1
             
         self.progress_dialog.endProgress()
-
-        return num_removed_roms
+        return dead_roms
 
     # ~~~ Now go processing item by item ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def _processFoundItems(self, 
