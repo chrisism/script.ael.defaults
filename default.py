@@ -192,13 +192,10 @@ def configure_scanner(args):
 # Scraper methods.
 # ---------------------------------------------------------------------------------------------
 def run_scraper(args):
-    logger.debug('Offline scraper: Starting ...')
-    scraper_settings_dict = json.loads(args.settings)
-    
-    logger.debug('========== run_scraper() BEGIN ==================================================')
+    logger.debug('========== Offline scraper.run_scraper() BEGIN ==================================================')
     pdialog             = kodi.ProgressDialog()
     
-    settings            = ScraperSettings.from_settings_dict(scraper_settings_dict)
+    settings            = ScraperSettings.from_settings_dict(args.settings)
     scraper_strategy    = ScrapeStrategy(
                             args.server_host, 
                             args.server_port, 

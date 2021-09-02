@@ -23,7 +23,7 @@ import os
 
 # --- AEL packages ---
 from ael import constants, platforms
-from ael.utils import io, text
+from ael.utils import io, text, kodi
 from ael.scrapers import Scraper
 
 logger = logging.getLogger(__name__)
@@ -44,17 +44,16 @@ class AEL_Offline_Scraper(Scraper):
     ]
 
     # --- Constructor ----------------------------------------------------------------------------
-    # @param settings: [dict] Addon settings. Particular scraper settings taken from here.
-    def __init__(self, settings):
+    def __init__(self):
         # --- This scraper settings ---
-        self.addon_dir = settings['scraper_aeloffline_addon_code_dir']
-        logger.debug('AEL_Offline_Scraper.__init__() Setting addon dir "{}"'.format(self.addon_dir))
+        self.addon_dir = kodi.getAddonDir()
+        logger.debug('AEL_Offline_Scraper.__init__() Setting addon dir "{}"'.format(self.addon_dir.getPath()))
 
-        # --- Cached TGDB metadata ---
+        # --- Cached metadata ---
         self._reset_cached_games()
 
-        # --- Pass down common scraper settings ---
-        super(AEL_Offline_Scraper, self).__init__(settings)
+        cache_dir = self.addon_dir.pjoin('cache/', True) 
+        super(AEL_Offline_Scraper, self).__init__(cache_dir.getPath())
 
     def get_id(self):
         return constants.SCRAPER_AEL_OFFLINE_ID
@@ -237,7 +236,7 @@ class AEL_Offline_Scraper(Scraper):
             return
 
         # Load XML database and keep it in memory for subsequent calls
-        xml_path = os.path.join(self.addon_dir, xml_file)
+        xml_path = os.path.join(self.addon_dir.getPath(), xml_file)
         # logger.debug('AEL_Offline_Scraper._initialise_platform() Loading XML {}'.format(xml_path))
         self.cached_games = audit_load_OfflineScraper_XML(xml_path)
         if not self.cached_games:
