@@ -58,7 +58,7 @@ def run_plugin():
     parser.add_argument('--rom_id', type=str, help="ROM ID")
     parser.add_argument('--romcollection_id', type=str, help="ROM Collection ID")
     parser.add_argument('--ael_addon_id', type=str, help="Addon configuration ID")
-    parser.add_argument('--settings', type=str, help="Specific run setting")
+    parser.add_argument('--settings', type=json.loads, help="Specific run setting")
     
     try:
         args = parser.parse_args()
@@ -206,19 +206,20 @@ def run_scraper(args):
                             AEL_Offline_Scraper(), 
                             pdialog)
                         
-    #scraper_strategy    = AEL_Offline_Scraper(scraper_settings)
-    # g_ScraperFactory.create_scraper(launcher, pdialog, scraper_settings)
-
-    succeeded = False
     if args.rom_id is not None:
-        succeeded = scraper_strategy.process_single_rom(args.rom_id)
+        scraped_rom = scraper_strategy.process_single_rom(args.rom_id)
+        pdialog.endProgress()
+        pdialog.startProgress('Saving ROM in database ...')
+        scraper_strategy.store_scraped_rom(args.ael_addon_id, scraped_rom)
+        pdialog.endProgress()
+        
     if args.romcollection_id is not None:
-        succeeded = scraper_strategy.process_collection(args.romcollection_id)
-
-    # roms = scraper_strategy.scanner_process_launcher(launcher)
-    pdialog.endProgress()
-    pdialog.startProgress('Saving ROM JSON database ...')
-
+        scraped_roms = scraper_strategy.process_collection(args.romcollection_id)
+        pdialog.endProgress()
+        pdialog.startProgress('Saving ROMs in database ...')
+        scraper_strategy.store_scraped_roms(args.ael_addon_id, scraped_roms)
+        pdialog.endProgress()
+        
         
 # ---------------------------------------------------------------------------------------------
 # RUN
