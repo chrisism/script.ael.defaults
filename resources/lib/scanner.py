@@ -71,7 +71,7 @@ class RomFolderScanner(RomScannerStrategy):
         return wizard
       
     def _configure_post_wizard_hook(self):
-        path = self.scanner_settings['rompath']
+        path = self.scanner_settings['rompath'] if 'rompath' in self.scanner_settings else None
         self.scanner_settings['secname'] = path
         return True
             
