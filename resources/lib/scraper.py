@@ -83,7 +83,7 @@ class AEL_Offline_Scraper(Scraper):
     def get_candidates(self, search_term, rom_FN:io.FileName, rom_checksums_FN, platform, status_dic):
         # AEL Offline cannot be disabled.
         # Prepare data for scraping.
-        rombase_noext = rom_FN.getBase_noext()
+        rombase_noext = rom_FN.getBaseNoExt()
         logger.debug('AEL_Offline_Scraper.get_candidates() rombase_noext "{}"'.format(rombase_noext))
         logger.debug('AEL_Offline_Scraper.get_candidates() AEL platform  "{}"'.format(platform))
 

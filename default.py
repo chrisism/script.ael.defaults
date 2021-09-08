@@ -207,14 +207,14 @@ def run_scraper(args):
         scraped_rom = scraper_strategy.process_single_rom(args.rom_id)
         pdialog.endProgress()
         pdialog.startProgress('Saving ROM in database ...')
-        scraper_strategy.store_scraped_rom(args.ael_addon_id, scraped_rom)
+        scraper_strategy.store_scraped_rom(args.ael_addon_id, args.rom_id, scraped_rom)
         pdialog.endProgress()
         
     if args.romcollection_id is not None:
         scraped_roms = scraper_strategy.process_collection(args.romcollection_id)
         pdialog.endProgress()
         pdialog.startProgress('Saving ROMs in database ...')
-        scraper_strategy.store_scraped_roms(args.ael_addon_id, scraped_roms)
+        scraper_strategy.store_scraped_roms(args.ael_addon_id, args.romcollection_id, scraped_roms)
         pdialog.endProgress()
         
         
