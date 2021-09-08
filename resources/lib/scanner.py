@@ -22,7 +22,7 @@ import typing
 import re
 
 # --- AEL packages ---
-from ael import report, platforms, settings, api
+from ael import report, settings, api
 from ael.utils import io, kodi
 
 from ael.scanners import RomScannerStrategy, ROMCandidateABC, ROMFileCandidate, MultiDiscInfo
@@ -63,7 +63,7 @@ class RomFolderScanner(RomScannerStrategy):
         
         wizard = kodi.WizardDialog_FileBrowse(wizard, 'rompath', 'Select the ROMs path',0, '')
         wizard = kodi.WizardDialog_YesNo(wizard, 'scan_recursive','Scan recursive', 'Scan through this directory and any subdirectories?')
-        wizard = kodi.WizardDialog_Dummy(wizard, 'romext', '', self._configuration_get_extensions_from_app_path)
+        wizard = kodi.WizardDialog_Dummy(wizard, 'romext', '', self.configuration_get_extensions_from_launchers)
         wizard = kodi.WizardDialog_Keyboard(wizard, 'romext','Set files extensions, use "|" as separator. (e.g lnk|cbr)')
         wizard = kodi.WizardDialog_YesNo(wizard, 'multidisc','Supports multi-disc ROMs?', 'Does this ROM collection contain multi-disc ROMS?')
         wizard = kodi.WizardDialog_YesNo(wizard, 'ignore_bios','Ignore BIOS', 'Ignore any BIOS file found during scanning?')
@@ -286,27 +286,4 @@ class RomFolderScanner(RomScannerStrategy):
         self.progress_dialog.endProgress()
         return new_roms
 
-    def _configuration_get_extensions_from_app_path(self, input, item_key, scanner_settings):
-        if input: return input
-        extensions = scanner_settings[item_key] if item_key in scanner_settings else ''
-        if extensions != '': return extensions
-        
-        if self.romcollection_id:
-            extensions_by_launchers = []
-            launchers = api.client_get_collection_launchers(self.webservice_host, self.webservice_port, self.romcollection_id)
-            for key, launcher_settings in launchers.items():
-                if 'application' not in launcher_settings:
-                    continue
-                app = launcher_settings['application'] 
-                appPath = io.FileName(app)
-                launcher_extensions = platforms.emudata_get_program_extensions(appPath.getBase())
-                if launcher_extensions != '':
-                    extensions_by_launchers.append(launcher_extensions)
-            
-            if len(extensions_by_launchers) > 0:
-                extensions = '|'.join(extensions_by_launchers)
-            else:
-                extensions = ''
-            
-        return extensions
              
