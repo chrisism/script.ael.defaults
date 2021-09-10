@@ -94,7 +94,7 @@
                 </setting>
                 <setting id="ael.scraper.friendlyname" type="string" label="Scraper friendlyname" help="">
                     <level>4</level>
-                    <default>AEL offline scraper</default>
+                    <default>Local files scraper</default>
                 </setting>
                 <setting id="ael.scraper.supported_types" type="string" label="Types supported by this scraper" help="">
                     <level>4</level>

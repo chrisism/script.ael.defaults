@@ -25,7 +25,7 @@ from ael.scrapers import ScrapeStrategy, ScraperSettings
 # Local modules
 from resources.lib.launcher import AppLauncher
 from resources.lib.scanner import RomFolderScanner
-from resources.lib.scraper import AEL_Offline_Scraper
+from resources.lib.scraper import LocalFilesScraper
 
 kodilogging.config() 
 logger = logging.getLogger(__name__)
@@ -192,15 +192,26 @@ def configure_scanner(args):
 # Scraper methods.
 # ---------------------------------------------------------------------------------------------
 def run_scraper(args):
-    logger.debug('========== Offline scraper.run_scraper() BEGIN ==================================================')
-    pdialog             = kodi.ProgressDialog()
+    logger.debug('========== Local files.run_scraper() BEGIN ==================================================')
+    pdialog  = kodi.ProgressDialog()
+    settings = ScraperSettings.from_settings_dict(args.settings)
+    # OVERRIDES
+    settings.search_term_mode     = constants.SCRAPE_AUTOMATIC
+    settings.game_selection_mode  = constants.SCRAPE_AUTOMATIC
+    settings.asset_selection_mode = constants.SCRAPE_AUTOMATIC
+    settings.overwrite_existing   = constants.SCRAPE_AUTOMATIC
     
-    settings            = ScraperSettings.from_settings_dict(args.settings)
+    if settings.scrape_metadata_policy != constants.SCRAPE_ACTION_NONE:
+        settings.scrape_metadata_policy = constants.SCRAPE_POLICY_NFO_PREFERED
+    if settings.scrape_assets_policy != constants.SCRAPE_ACTION_NONE:
+        settings.scrape_assets_policy = constants.SCRAPE_POLICY_LOCAL_ONLY
+    
+    
     scraper_strategy    = ScrapeStrategy(
                             args.server_host, 
                             args.server_port, 
                             settings, 
-                            AEL_Offline_Scraper(), 
+                            LocalFilesScraper(), 
                             pdialog)
                         
     if args.rom_id is not None:
