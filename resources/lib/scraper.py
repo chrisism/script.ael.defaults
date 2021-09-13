@@ -30,17 +30,7 @@ logger = logging.getLogger(__name__)
 # Local files scraper.
 # ------------------------------------------------------------------------------------------------
 class LocalFilesScraper(Scraper):
-    # --- Class variables ------------------------------------------------------------------------
-    supported_metadata_list = [
-        constants.META_TITLE_ID,
-        constants.META_YEAR_ID,
-        constants.META_GENRE_ID,
-        constants.META_DEVELOPER_ID,
-        constants.META_NPLAYERS_ID,
-        constants.META_ESRB_ID,
-        constants.META_PLOT_ID,
-    ]
-
+    
     # --- Constructor ----------------------------------------------------------------------------
     def __init__(self):
         self.addon_dir = kodi.getAddonDir()

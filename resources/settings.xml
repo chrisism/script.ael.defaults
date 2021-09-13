@@ -102,7 +102,7 @@
                 </setting>
                 <setting id="ael.scraper.supported_assets" type="string" label="Assets supported by this scraper" help="">
                     <level>4</level>
-                    <default>fanart|banner|snap|clearlogo|boxfront|boxback</default>
+                    <default>fanart|banner|snap|clearlogo|title|boxfront|boxback|3dbox|cartridge|flyer|map|manual|trailer</default>
                 </setting>
             </group>
         </category>
