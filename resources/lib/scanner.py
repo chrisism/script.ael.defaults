@@ -25,10 +25,28 @@ import re
 from ael import report, settings, api
 from ael.utils import io, kodi
 
-from ael.scanners import RomScannerStrategy, ROMCandidateABC, ROMFileCandidate, MultiDiscInfo
+from ael.scanners import RomScannerStrategy, ROMCandidateABC, MultiDiscInfo
 
 logger = logging.getLogger(__name__)
+          
+class ROMFileCandidate(ROMCandidateABC):
+    
+    def __init__(self, file: io.FileName):
+        self.file = file
+        super(ROMFileCandidate, self).__init__()
         
+    def get_ROM(self) -> api.ROMObj:
+        rom = api.ROMObj()
+        rom.set_file(self.file)
+        scanned_data = {
+            'file': self.file.getPath()
+        }
+        rom.set_scanned_data(scanned_data)
+        return rom
+        
+    def get_sort_value(self):
+        return self.file.getBase()
+      
 class RomFolderScanner(RomScannerStrategy):
     
     # --------------------------------------------------------------------------------------------
@@ -244,8 +262,7 @@ class RomFolderScanner(RomScannerStrategy):
             # ~~~~~ Process new ROM and add to the list ~~~~~
             # --- Create new rom dictionary ---
             # >> Database always stores the original (non transformed/manipulated) path
-            new_rom = api.ROMObj()
-            new_rom.set_file(ROM_file)
+            new_rom = file_candidate.get_ROM()
                                     
             # checksums
             ROM_checksums = ROM_file_original if MDSet.isMultiDisc and scanner_multidisc else ROM_file
