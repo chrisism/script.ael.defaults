@@ -17,6 +17,7 @@ from __future__ import unicode_literals
 from __future__ import division
 
 import logging
+import collections
 
 # --- AEL packages ---
 from ael import platforms
@@ -52,14 +53,6 @@ class AppLauncher(LauncherABC):
         wizard = kodi.WizardDialog_Keyboard(wizard, 'args', 'Application arguments')
         
         return wizard
-    
-    def _editor_get_wizard(self, wizard):
-        wizard = kodi.WizardDialog_YesNo(wizard, 'change_app', 'Change application?', 'Set a different application? Currently "{}"'.format(self.launcher_settings['application']))
-        wizard = kodi.WizardDialog_FileBrowse(wizard, 'application', 'Select the launcher application', 1, self._builder_get_appbrowser_filter, 
-                                              None, self._builder_wants_to_change_app)
-        wizard = kodi.WizardDialog_Keyboard(wizard, 'args', 'Application arguments')
-        
-        return wizard
             
     def _build_post_wizard_hook(self):        
         self.non_blocking = True
@@ -77,11 +70,28 @@ class AppLauncher(LauncherABC):
 
         return default_arguments
     
-    #
-    # Wizard helper, when a user wants to change the application path.
-    #
-    def _builder_wants_to_change_app(self, item_key, launcher):
-        return launcher[item_key] == True
+    def _builder_get_edit_options(self):
+        options = collections.OrderedDict()
+        options[self._change_application]       = 'Change application ({})'.format(self.launcher_settings['application'])
+        options[self._change_launcher_arguments]= "Modify Arguments: '{0}'".format(self.launcher_settings['args'])
+        return options
+
+    def _change_application(self):
+        current_application = self.launcher_settings['application']
+        selected_application = kodi.browse(1, 'Select the launcher application', 'files',
+                                            '', False, False, current_application)
+
+        if selected_application is None or selected_application == current_application:
+            return
+        
+        self.launcher_settings['application'] = selected_application
+
+    def _change_launcher_arguments(self):
+        args = self.launcher_settings['args']
+        args = kodi.dialog_keyboard('Edit application arguments', text=args)
+
+        if args is None: return
+        self.launcher_settings['args'] = args
 
     # ---------------------------------------------------------------------------------------------
     # Execution methods

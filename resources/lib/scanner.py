@@ -20,6 +20,7 @@ from __future__ import division
 import logging
 import typing
 import re
+import collections
 
 # --- AEL packages ---
 from ael import report, settings, api
@@ -92,7 +93,53 @@ class RomFolderScanner(RomScannerStrategy):
         path = self.scanner_settings['rompath'] if 'rompath' in self.scanner_settings else None
         self.scanner_settings['secname'] = path
         return True
-            
+
+    def _configure_get_edit_options(self) -> dict:
+        recursive_scan_str = 'ON' if self.scanner_settings['scan_recursive'] else 'OFF'
+        multidisc_str      = 'ON' if self.scanner_settings['multidisc'] else 'OFF'
+        bios_str           = 'ON' if self.scanner_settings['ignore_bios'] else 'OFF'
+
+        options = collections.OrderedDict()
+        options[self._change_rompath]       = 'Change ROMs path ({})'.format(self.scanner_settings['rompath'])
+        options[self._change_rom_ext]       = "Modify ROM extensions: '{0}'".format(self.scanner_settings['romext'])
+        options[self._change_recursive_scan]= "Recursive scan: '{0}'".format(recursive_scan_str)
+        options[self._change_multidisc]     = "Multidisc ROM support (now {0})".format(multidisc_str)
+        options[self._change_ignore_bios]   = "Ignore any BIOS file (now {0})".format(bios_str)
+
+        return options
+
+    def _change_rompath(self):
+        current_path = self.scanner_settings['rompath']
+        selected_path = kodi.browse(0, 'Select Files path', 'files',
+                                        '', False, False, current_path)
+
+        if selected_path is None or selected_path == current_path:
+            return
+        
+        self.scanner_settings['rompath'] = selected_path
+
+    def _change_rom_ext(self):
+        exts = self.scanner_settings['romext']
+        exts = kodi.dialog_keyboard('Edit ROM extensions, use "|" as separator. (e.g lnk|cbr)', text=exts)
+
+        if exts is None: return
+        self.scanner_settings['romext'] = exts
+
+    def _change_recursive_scan(self):
+        current_state = self.scanner_settings['scan_recursive'] 
+        self.scanner_settings['scan_recursive'] = not current_state
+
+    def _change_multidisc(self):
+        current_state = self.scanner_settings['multidisc'] 
+        self.scanner_settings['multidisc'] = not current_state
+
+    def _change_ignore_bios(self):
+        current_state = self.scanner_settings['ignore_bios'] 
+        self.scanner_settings['ignore_bios'] = not current_state
+
+    # ---------------------------------------------------------------------------------------------
+    # Execution methods
+    # ---------------------------------------------------------------------------------------------         
     # ~~~ Scan for new files (*.*) and put them in a list ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def _getCandidates(self, launcher_report: report.Reporter) -> typing.List[ROMCandidateABC]:
         self.progress_dialog.startProgress('Scanning and caching files in ROM path ...')
