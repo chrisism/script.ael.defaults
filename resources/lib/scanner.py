@@ -110,8 +110,7 @@ class RomFolderScanner(RomScannerStrategy):
 
     def _change_rompath(self):
         current_path = self.scanner_settings['rompath']
-        selected_path = kodi.browse(0, 'Select Files path', 'files',
-                                        '', False, False, current_path)
+        selected_path = kodi.browse(0, 'Select Files path', 'files', preselected_path=current_path)
 
         if selected_path is None or selected_path == current_path:
             return
