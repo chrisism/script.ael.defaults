@@ -204,7 +204,6 @@ class RomFolderScanner(RomScannerStrategy):
         allowedExtensions = self.get_rom_extensions()
         scanner_multidisc = self.supports_multidisc()
 
-        skip_if_scraping_failed = settings.getSettingAsBool('scan_skip_on_scraping_failure')
         for candidate in sorted(candidates, key=lambda c: c.get_sort_value()):
             file_candidate:ROMFileCandidate = candidate
             ROM_file = file_candidate.file
