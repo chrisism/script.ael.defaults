@@ -307,33 +307,7 @@ class RomFolderScanner(RomScannerStrategy):
             # ~~~~~ Process new ROM and add to the list ~~~~~
             # --- Create new rom dictionary ---
             # >> Database always stores the original (non transformed/manipulated) path
-            new_rom = file_candidate.get_ROM()
-                                    
-            # checksums
-            ROM_checksums = ROM_file_original if MDSet.isMultiDisc and scanner_multidisc else ROM_file
-
-            # scraping_succeeded = True
-            # self.progress_dialog.updateMessages(file_text, 'Scraping {0}...'.format(ROM_file.getBaseNoExt()))
-            # try:
-            #     self.scraping_strategy.scanner_process_ROM(new_rom, ROM_checksums)
-            # except Exception as ex:
-            #     scraping_succeeded = False        
-            #     logger.error('(Exception) Object type "{}"'.format(type(ex)))
-            #     logger.error('(Exception) Message "{}"'.format(str(ex)))
-            #     logger.warning('Could not scrape "{}"'.format(ROM_file.getBaseNoExt()))
-            #     #logger.debug(traceback.format_exc())
-            
-            # if not scraping_succeeded and skip_if_scraping_failed:
-            #     kodi.display_user_message({
-            #         'dialog': KODI_MESSAGE_NOTIFY_WARN,
-            #         'msg': 'Scraping "{}" failed. Skipping.'.format(ROM_file.getBaseNoExt())
-            #     })
-            # else:
-            #     # --- This was the first ROM in a multidisc set ---
-            #     if scanner_multidisc and MDSet.isMultiDisc and not MultiDiscInROMs:
-            #         logger.info('Adding to ROMs dic first disk "{0}"'.format(MDSet.discName))
-            #         new_rom.add_disk(MDSet.discName)
-                
+            new_rom = file_candidate.get_ROM()                                       
             new_roms.append(new_rom)
             
             # ~~~ Check if user pressed the cancel button ~~~

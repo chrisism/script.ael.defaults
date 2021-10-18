@@ -56,9 +56,9 @@ class Test_localfilesscraper(unittest.TestCase):
                 
         # assert
         self.assertTrue(actual)
-        self.assertEqual(u'Dr. Mario', rom.get_name())
-        self.assertEqual(u'Puzzle', rom.get_genre())
-        logger.info(rom)
+        self.assertEqual(u'Dr. Mario', actual.get_name())
+        self.assertEqual(u'Puzzle', actual.get_genre())
+        logger.info(actual.get_data_dic())
 
     # def test_scraping_metadata_for_game(self):
         

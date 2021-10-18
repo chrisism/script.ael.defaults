@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 from resources.lib.scanner import RomFolderScanner
 
 from ael.api import ROMObj
-from ael import constants
 
 class Test_romscannerstests(unittest.TestCase):
     
@@ -38,14 +37,15 @@ class Test_romscannerstests(unittest.TestCase):
         
         # arrange
         recursive_scan_mock.return_value = [
-           '//fake/folder/myfile.dot',
-           '//fake/folder/donkey_kong.zip', 
-           '//fake/folder/tetris.zip', 
-           '//fake/folder/thumbs.db',
-           '//fake/folder/duckhunt.zip']
+           FakeFile('//fake/folder/myfile.dot'),
+           FakeFile('//fake/folder/donkey_kong.zip'), 
+           FakeFile('//fake/folder/tetris.zip'), 
+           FakeFile('//fake/folder/thumbs.db'),
+           FakeFile('//fake/folder/duckhunt.zip')]
         api_settings_mock.return_value = {
             'multidisc': False,
-            'romext': 'zip'
+            'romext': 'zip',
+            'scan_recursive': True
         }
         
         report_dir = FakeFile('//fake_reports/')
@@ -67,12 +67,13 @@ class Test_romscannerstests(unittest.TestCase):
         scanner_id = random_string(5)
         
         recursive_scan_mock.return_value = [
-           '//fake/folder/myfile.dot',
-           '//fake/folder/donkey_kong.zip', 
-           '//fake/folder/tetris.zip']
+           FakeFile('//fake/folder/myfile.dot'),
+           FakeFile('//fake/folder/donkey_kong.zip'), 
+           FakeFile('//fake/folder/tetris.zip')]
         api_settings_mock.return_value = {
             'multidisc': False,
-            'romext': 'zip'
+            'romext': 'zip',
+            'scan_recursive': True
         }               
         
         roms = []
@@ -82,7 +83,7 @@ class Test_romscannerstests(unittest.TestCase):
         roms.append(ROMObj({'id': '4', 'scanned_by_id': scanner_id, 'm_name': 'this-one-will-be-deleted-again', 'filename': '//not-existing/byebye.zip'})  )      
         api_roms_mock.return_value = roms
         
-        lambda f: f.getPath().startswith('//fake/')
+        file_exists_mock.side_effect = lambda f: f.getPath().startswith('//fake/')
         report_dir = FakeFile('//fake_reports/')
         expected = 3
 
@@ -93,9 +94,6 @@ class Test_romscannerstests(unittest.TestCase):
         # assert
         self.assertEqual(expected, target.amount_of_dead_roms())
         print(report_dir.getFakeContent())
-           
-    def is_in_fake(self):
-        return self.getPath().startswith('//fake/')
     
     @patch('resources.lib.scanner.io.FileName.exists_python', autospec=True)    
     @patch('ael.api.client_get_roms_in_collection')
@@ -108,20 +106,21 @@ class Test_romscannerstests(unittest.TestCase):
         scanner_id = random_string(5)
         
         recursive_scan_mock.return_value = [
-           '//fake/folder/zekda.zip',
-           '//fake/folder/donkey kong (Disc 1 of 2).zip', 
-           '//fake/folder/donkey kong (Disc 2 of 2).zip', 
-           '//fake/folder/tetris.zip']
+           FakeFile('//fake/folder/zekda.zip'),
+           FakeFile('//fake/folder/donkey kong (Disc 1 of 2).zip'), 
+           FakeFile('//fake/folder/donkey kong (Disc 2 of 2).zip'), 
+           FakeFile('//fake/folder/tetris.zip')]
         api_settings_mock.return_value = {
             'multidisc': True,
-            'romext': 'zip'
+            'romext': 'zip',
+            'scan_recursive': True
         }               
 
         roms = []
         roms.append(ROMObj({'id': '1', 'm_name': 'Rocket League', 'filename': '//fake/folder/rocket.zip'}))      
         api_roms_mock.return_value = roms
         
-        file_exists_mock.side_effect = Test_romscannerstests.is_in_fake#lambda f: f.getPath().startswith('//fake/')
+        file_exists_mock.side_effect = lambda f: f.getPath().startswith('//fake/')
         report_dir = FakeFile('//fake_reports/')        
         target = RomFolderScanner(report_dir, scanner_id, random_string(10), None, 0, FakeProgressDialog())
         
@@ -140,7 +139,7 @@ class Test_romscannerstests(unittest.TestCase):
 
         self.assertEqual(expected, target.amount_of_scanned_roms())
     
-    @patch('resources.lib.scanner.io.FileName.exists_python')    
+    @patch('resources.lib.scanner.io.FileName.exists_python', autospec=True)    
     @patch('ael.api.client_get_roms_in_collection')
     @patch('ael.api.client_get_collection_scanner_settings')
     @patch('resources.lib.scanner.io.FileName.recursiveScanFilesInPath')
@@ -150,12 +149,13 @@ class Test_romscannerstests(unittest.TestCase):
         scanner_id = random_string(5)
         
         recursive_scan_mock.return_value = [
-           '//fake/folder/zelda.zip',
-           '//fake/folder/donkey kong.zip', 
-           '//fake/folder/tetris.zip']
+           FakeFile('//fake/folder/zelda.zip'),
+           FakeFile('//fake/folder/donkey kong.zip'), 
+           FakeFile('//fake/folder/tetris.zip')]
         api_settings_mock.return_value = {
             'multidisc': False,
-            'romext': 'zip'
+            'romext': 'zip',
+            'scan_recursive': True
         }  
          
         roms = []
@@ -168,7 +168,7 @@ class Test_romscannerstests(unittest.TestCase):
         report_dir = FakeFile('//fake_reports/')        
         target = RomFolderScanner(report_dir, scanner_id, random_string(10), None, 0, FakeProgressDialog())
         
-        expected = 4
+        expected = 1 # only donkey kong.zip is new
 
         # act
         target.scan()
@@ -193,13 +193,14 @@ class Test_romscannerstests(unittest.TestCase):
         scanner_id = random_string(5)
         
         recursive_scan_mock.return_value = [
-           '//fake/folder/zelda.zip',
-           '//fake/folder/donkey kong.zip', 
-           '//fake/folder/[BIOS] dinkytoy.zip', 
-           '//fake/folder/tetris.zip']
+           FakeFile('//fake/folder/zelda.zip'),
+           FakeFile('//fake/folder/donkey kong.zip'), 
+           FakeFile('//fake/folder/[BIOS] dinkytoy.zip'), 
+           FakeFile('//fake/folder/tetris.zip')]
         api_settings_mock.return_value = {
             'multidisc': False,
-            'romext': 'zip'
+            'romext': 'zip',
+            'scan_recursive': True
         }  
          
         roms = []
@@ -212,7 +213,7 @@ class Test_romscannerstests(unittest.TestCase):
         report_dir = FakeFile('//fake_reports/')        
         target = RomFolderScanner(report_dir, scanner_id, random_string(10), None, 0, FakeProgressDialog())
         
-        expected = 3
+        expected = 1 # donkey kong.zip is only new ROM
 
         # act
         target.scan()
