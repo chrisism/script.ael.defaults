@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import logging
 
-from fakes import FakeProgressDialog, random_string
+from fakes import FakeProgressDialog, random_string, FakeFile
 
 logging.basicConfig(format = '%(asctime)s %(module)s %(levelname)s: %(message)s',
                 datefmt = '%m/%d/%Y %I:%M:%S %p', level = logging.DEBUG)
@@ -35,11 +35,12 @@ class Test_localfilesscraper(unittest.TestCase):
 
     @patch('ael.api.client_get_rom')
     def test_scraping_metadata_for_game(self, api_rom_mock: MagicMock):        
-        # arrange
+        
+        # arrange        
         settings = ScraperSettings()
         settings.scrape_metadata_policy = constants.SCRAPE_POLICY_NFO_PREFERED
         settings.scrape_assets_policy = constants.SCRAPE_ACTION_NONE
-                
+                        
         rom_id = random_string(5)
         rom = ROMObj({
             'id': rom_id,
@@ -59,7 +60,69 @@ class Test_localfilesscraper(unittest.TestCase):
         self.assertEqual(u'Dr. Mario', actual.get_name())
         self.assertEqual(u'Puzzle', actual.get_genre())
         logger.info(actual.get_data_dic())
+        
+    @patch('ael.api.client_get_rom')
+    def test_when_scraping_with_nfoscraper_it_will_give_the_correct_result(self, api_rom_mock: MagicMock):    
+    
+        # arrange        
+        settings = ScraperSettings()
+        settings.scrape_metadata_policy = constants.SCRAPE_POLICY_NFO_PREFERED
+        settings.scrape_assets_policy = constants.SCRAPE_ACTION_NONE
+                
+        rom_id = random_string(5)
+        rom = ROMObj({
+            'id': rom_id,
+            'filename': Test_localfilesscraper.TEST_ASSETS_DIR + '\\pitfall.zip'
+        })
+        api_rom_mock.return_value = rom
+        
+        expected = 'Pitfall: The Mayan Adventure'        
+        target = ScrapeStrategy(None, 0, settings, LocalFilesScraper(), FakeProgressDialog())
+                        
+        # act
+        actual = target.process_single_rom(rom_id)
+                
+        # assert
+        self.assertTrue(actual)
+        self.assertEqual(expected, actual.get_name())
+        logger.info(actual.get_data_dic())
+        
+    @patch('resources.lib.scraper.io.FileName.scanFilesInPath')
+    @patch('ael.api.client_get_rom')
+    def test_when_scraping_local_assets_it_will_give_the_correct_result(self, api_rom_mock:MagicMock, file_mock:MagicMock):
+        # arrange
+        file_mock.return_value = [FakeFile('x.jpg'),FakeFile('y.jpg'), FakeFile('pitfall.jpg'), FakeFile('donkeykong.jpg')]
 
+        settings = ScraperSettings()
+        settings.scrape_metadata_policy = constants.SCRAPE_ACTION_NONE
+        settings.scrape_assets_policy = constants.SCRAPE_POLICY_SCRAPE_ONLY
+        settings.asset_IDs_to_scrape = [constants.ASSET_TITLE_ID]
+              
+        rom_id = random_string(5)
+        rom = ROMObj({
+            'id': rom_id,
+            'filename': '/roms/Pitfall.zip',
+            'platform': 'Sega 32X',
+            'assets': {key: '' for key in constants.ROM_ASSET_ID_LIST},
+            'asset_paths': {
+                constants.ASSET_TITLE_ID: '/titles/',
+            }
+        })
+        api_rom_mock.return_value = rom
+        
+        expected = '/titles/Pitfall.jpg'
+        target = ScrapeStrategy(None, 0, settings, LocalFilesScraper(), FakeProgressDialog())  
+                               
+        # act
+        actual = target.process_single_rom(rom_id)
+                
+        # assert
+        self.assertTrue(actual) 
+        logger.info(actual.get_data_dic()) 
+        
+        self.assertTrue(actual.entity_data['assets'][constants.ASSET_TITLE_ID], 'No title defined')
+        self.assertEquals(actual.entity_data['assets'][constants.ASSET_TITLE_ID], expected)
+        
     # def test_scraping_metadata_for_game(self):
         
     #     # arrange
