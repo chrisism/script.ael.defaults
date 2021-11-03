@@ -21,8 +21,9 @@ import logging
 
 # --- AEL packages ---
 from ael import constants
-from ael.utils import io, kodi
+from ael.utils import kodi
 from ael.scrapers import Scraper
+from ael.api import ROMObj
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,16 @@ logger = logging.getLogger(__name__)
 # ------------------------------------------------------------------------------------------------
 class LocalFilesScraper(Scraper):
     
+    supported_metadata_list = [
+        constants.META_TITLE_ID,
+        constants.META_YEAR_ID,
+        constants.META_GENRE_ID,
+        constants.META_DEVELOPER_ID,
+        constants.META_NPLAYERS_ID,
+        constants.META_ESRB_ID,
+        constants.META_PLOT_ID,
+    ]
+     
     # --- Constructor ----------------------------------------------------------------------------
     def __init__(self):
         self.addon_dir = kodi.getAddonDir()
@@ -59,7 +70,7 @@ class LocalFilesScraper(Scraper):
 
     def check_before_scraping(self, status_dic): return status_dic
 
-    def get_candidates(self, search_term, rom_FN:io.FileName, rom_checksums_FN, platform, status_dic): return []
+    def get_candidates(self, search_term, rom: ROMObj, platform, status_dic): return []
 
     def get_metadata(self, status_dic): return self._new_gamedata_dic()
 
