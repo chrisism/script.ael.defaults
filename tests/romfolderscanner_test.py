@@ -77,10 +77,10 @@ class Test_romscannerstests(unittest.TestCase):
         }               
         
         roms = []
-        roms.append(ROMObj({'id': '1', 'scanned_by_id': scanner_id, 'm_name': 'this-one-will-be-deleted', 'filename': '//not-existing/byebye.zip'}))
-        roms.append(ROMObj({'id': '2', 'scanned_by_id': scanner_id, 'm_name': 'this-one-will-be-deleted-too', 'filename': '//not-existing/byebye.zip'}))
-        roms.append(ROMObj({'id': '3', 'scanned_by_id': scanner_id, 'm_name': 'Rocket League', 'filename': '//fake/folder/rocket.zip'}))
-        roms.append(ROMObj({'id': '4', 'scanned_by_id': scanner_id, 'm_name': 'this-one-will-be-deleted-again', 'filename': '//not-existing/byebye.zip'})  )      
+        roms.append(ROMObj({'id': '1', 'scanned_by_id': scanner_id, 'm_name': 'this-one-will-be-deleted', 'scanned_data': { 'file': '//not-existing/byebye.zip'}}))
+        roms.append(ROMObj({'id': '2', 'scanned_by_id': scanner_id, 'm_name': 'this-one-will-be-deleted-too', 'scanned_data': { 'file': '//not-existing/byebye.zip'}}))
+        roms.append(ROMObj({'id': '3', 'scanned_by_id': scanner_id, 'm_name': 'Rocket League', 'scanned_data': { 'file': '//fake/folder/rocket.zip'}}))
+        roms.append(ROMObj({'id': '4', 'scanned_by_id': scanner_id, 'm_name': 'this-one-will-be-deleted-again', 'scanned_data': { 'file': '//not-existing/byebye.zip'}}))
         api_roms_mock.return_value = roms
         
         file_exists_mock.side_effect = lambda f: f.getPath().startswith('//fake/')
@@ -117,7 +117,7 @@ class Test_romscannerstests(unittest.TestCase):
         }               
 
         roms = []
-        roms.append(ROMObj({'id': '1', 'm_name': 'Rocket League', 'filename': '//fake/folder/rocket.zip'}))      
+        roms.append(ROMObj({'id': '1', 'm_name': 'Rocket League', 'scanned_data': { 'file': '//fake/folder/rocket.zip'}}))      
         api_roms_mock.return_value = roms
         
         file_exists_mock.side_effect = lambda f: f.getPath().startswith('//fake/')
@@ -159,9 +159,9 @@ class Test_romscannerstests(unittest.TestCase):
         }  
          
         roms = []
-        roms.append(ROMObj({'id': '1','scanned_by_id': scanner_id, 'm_name': 'Rocket League', 'filename': '//fake/folder/rocket.zip'}))
-        roms.append(ROMObj({'id': '2','scanned_by_id': scanner_id, 'm_name': 'Zelda', 'filename': '//fake/folder/zelda.zip'}))
-        roms.append(ROMObj({'id': '3','scanned_by_id': scanner_id, 'm_name': 'Tetris', 'filename': '//fake/folder/tetris.zip'}))
+        roms.append(ROMObj({'id': '1','scanned_by_id': scanner_id, 'm_name': 'Rocket League', 'scanned_data': { 'file':'//fake/folder/rocket.zip'}}))
+        roms.append(ROMObj({'id': '2','scanned_by_id': scanner_id, 'm_name': 'Zelda', 'scanned_data': { 'file': '//fake/folder/zelda.zip'}}))
+        roms.append(ROMObj({'id': '3','scanned_by_id': scanner_id, 'm_name': 'Tetris', 'scanned_data': { 'file': '//fake/folder/tetris.zip'}}))
         api_roms_mock.return_value = roms
         
         file_exists_mock.side_effect = lambda f: f.getPath().startswith('//fake/')
@@ -204,9 +204,9 @@ class Test_romscannerstests(unittest.TestCase):
         }  
          
         roms = []
-        roms.append(ROMObj({'id': '1','scanned_by_id': scanner_id, 'm_name': 'Rocket League', 'filename': '//fake/folder/rocket.zip'}))
-        roms.append(ROMObj({'id': '2','scanned_by_id': scanner_id, 'm_name': 'Zelda', 'filename': '//fake/folder/zelda.zip'}))
-        roms.append(ROMObj({'id': '3','scanned_by_id': scanner_id, 'm_name': 'Tetris', 'filename': '//fake/folder/tetris.zip'}))
+        roms.append(ROMObj({'id': '1','scanned_by_id': scanner_id, 'm_name': 'Rocket League', 'scanned_data': { 'file': '//fake/folder/rocket.zip'}}))
+        roms.append(ROMObj({'id': '2','scanned_by_id': scanner_id, 'm_name': 'Zelda', 'scanned_data': { 'file': '//fake/folder/zelda.zip'}}))
+        roms.append(ROMObj({'id': '3','scanned_by_id': scanner_id, 'm_name': 'Tetris', 'scanned_data': { 'file': '//fake/folder/tetris.zip'}}))
         api_roms_mock.return_value = roms
         
         file_exists_mock.side_effect = lambda f: f.getPath().startswith('//fake/')

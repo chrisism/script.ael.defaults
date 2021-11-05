@@ -44,7 +44,9 @@ class Test_localfilesscraper(unittest.TestCase):
         rom_id = random_string(5)
         rom = ROMObj({
             'id': rom_id,
-            'filename': Test_localfilesscraper.TEST_ASSETS_DIR + '\\dr_mario.zip'
+            'scanned_data': {
+                'file': Test_localfilesscraper.TEST_ASSETS_DIR + '\\dr_mario.zip'
+            }
         })
         api_rom_mock.return_value = rom
         #with open(Test_nfo_scraper.TEST_ASSETS_DIR + "\\dr_mario.nfo", 'r') as f:
@@ -72,7 +74,9 @@ class Test_localfilesscraper(unittest.TestCase):
         rom_id = random_string(5)
         rom = ROMObj({
             'id': rom_id,
-            'filename': Test_localfilesscraper.TEST_ASSETS_DIR + '\\pitfall.zip'
+            'scanned_data': {
+                'file':  Test_localfilesscraper.TEST_ASSETS_DIR + '\\pitfall.zip'
+            }
         })
         api_rom_mock.return_value = rom
         
@@ -87,7 +91,7 @@ class Test_localfilesscraper(unittest.TestCase):
         self.assertEqual(expected, actual.get_name())
         logger.info(actual.get_data_dic())
         
-    @patch('resources.lib.scraper.io.FileName.scanFilesInPath')
+    @patch('ael.utils.io.FileName.scanFilesInPath')
     @patch('ael.api.client_get_rom')
     def test_when_scraping_local_assets_it_will_give_the_correct_result(self, api_rom_mock:MagicMock, file_mock:MagicMock):
         # arrange
@@ -101,7 +105,10 @@ class Test_localfilesscraper(unittest.TestCase):
         rom_id = random_string(5)
         rom = ROMObj({
             'id': rom_id,
-            'filename': '/roms/Pitfall.zip',
+            'scanned_data': {
+                'identifier': 'Pitfall',
+                'file': '/roms/Pitfall.zip'
+            },
             'platform': 'Sega 32X',
             'assets': {key: '' for key in constants.ROM_ASSET_ID_LIST},
             'asset_paths': {

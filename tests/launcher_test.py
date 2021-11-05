@@ -160,7 +160,7 @@ class Test_Launcher(unittest.TestCase):
         collection_id   = random_string(10)
         rom_id          = random_string(10)
         
-        expected_rom = ROMObj({ 'id': rom_id, 'm_name': 'TestCase', 'filename':'testing.zip', 'altapp': '', 'altarg': '' })
+        expected_rom = ROMObj({ 'id': rom_id, 'm_name': 'TestCase', 'scanned_data': {'file':'testing.zip'}, 'altapp': '', 'altarg': '' })
         api_rom_mock.return_value = expected_rom
                 
         mock = FakeExecutor()

@@ -23,7 +23,7 @@ import re
 import collections
 
 # --- AEL packages ---
-from ael import report, settings, api
+from ael import report, api
 from ael.utils import io, kodi
 
 from ael.scanners import RomScannerStrategy, ROMCandidateABC, MultiDiscInfo
@@ -38,9 +38,9 @@ class ROMFileCandidate(ROMCandidateABC):
         
     def get_ROM(self) -> api.ROMObj:
         rom = api.ROMObj()
-        rom.set_file(self.file)
         scanned_data = {
-            'file': self.file.getPath()
+            'file': self.file.getPath(),
+            'identifier': self.file.getBaseNoExt()
         }
         rom.set_scanned_data(scanned_data)
         return rom
@@ -172,9 +172,8 @@ class RomFolderScanner(RomScannerStrategy):
         i = 0
             
         self.progress_dialog.startProgress('Checking for dead ROMs ...', num_roms)
-            
         for rom in reversed(roms):
-            fileName = rom.get_file()
+            fileName = rom.get_scanned_data_element_as_file('file')
             logger.info('Searching {0}'.format(fileName.getPath()))
             self.progress_dialog.updateProgress(i)
             
@@ -249,7 +248,7 @@ class RomFolderScanner(RomScannerStrategy):
                 # >> Check if the set is already in launcher ROMs.
                 MultiDisc_rom_id = None
                 for new_rom in new_roms:
-                    temp_FN = new_rom.get_file()
+                    temp_FN = new_rom.get_scanned_data_element_as_file('file')
                     if temp_FN.getBase() == MDSet.setName:
                         MultiDiscInROMs  = True
                         MultiDisc_rom    = new_rom
@@ -286,7 +285,7 @@ class RomFolderScanner(RomScannerStrategy):
             self.progress_dialog.updateMessage('{}\nChecking if ROM is not already in collection...'.format(file_text))
             repeatedROM = False
             for rom in roms:
-                rpath = rom.get_file() 
+                rpath = rom.get_scanned_data_element_as_file('file')
                 if rpath == ROM_file: 
                     repeatedROM = True
         
