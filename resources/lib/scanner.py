@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Advanced Emulator Launcher: Default scanner implementation
+# Advanced Kodi Launcher: Default scanner implementation
 #
 # Copyright (c) Chrisism <crizizz@gmail.com>
 #

@@ -1,5 +1,5 @@
 #
-# Advanced Emulator Launcher: Default launcher implementation
+# Advanced Kodi Launcher: Default launcher implementation
 #
 # Copyright (c) Chrisism <crizizz@gmail.com>
 #

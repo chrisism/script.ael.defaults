@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Advanced Emulator Launcher: Default scraper implementation
+# Advanced Kodi Launcher: Default scraper implementation
 #
 # Copyright (c) Chrisism <crizizz@gmail.com>
 #
