@@ -54,7 +54,8 @@ stages:
           Contents: |
               *.md
               *.xml
-              lib/**/*.*
+              *.py
+              resources/**/*.*
               media/**/*.*
           TargetFolder: '$(build.artifactstagingdirectory)/script.akl.defaults/'
           CleanTargetFolder: true

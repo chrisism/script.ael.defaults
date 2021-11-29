@@ -1,6 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 #
-# Default plugins for AEL
+# Default plugins for AKL
 # Launchers, scrapers and scanners
 #
 # --- Python standard library ---
@@ -15,12 +15,12 @@ import json
 # --- Kodi stuff ---
 import xbmcaddon
 
-# AEL main imports
-from ael import constants, settings
-from ael.utils import kodilogging, io, kodi
+# AKL main imports
+from akl import constants, settings
+from akl.utils import kodilogging, io, kodi
 
-from ael.launchers import ExecutionSettings, get_executor_factory
-from ael.scrapers import ScrapeStrategy, ScraperSettings
+from akl.launchers import ExecutionSettings, get_executor_factory
+from akl.scrapers import ScrapeStrategy, ScraperSettings
 
 # Local modules
 from resources.lib.launcher import AppLauncher
@@ -50,14 +50,14 @@ def run_plugin():
     if io.is_linux():   logger.info('OS               "Linux"')
     for i in range(len(sys.argv)): logger.info('sys.argv[{}] "{}"'.format(i, sys.argv[i]))
     
-    parser = argparse.ArgumentParser(prog='script.ael.defaults')
+    parser = argparse.ArgumentParser(prog='script.akl.defaults')
     parser.add_argument('--cmd', help="Command to execute", choices=['launch', 'scan', 'scrape', 'configure'])
     parser.add_argument('--type',help="Plugin type", choices=['LAUNCHER', 'SCANNER', 'SCRAPER'], default=constants.AddonType.LAUNCHER.name)
     parser.add_argument('--server_host', type=str, help="Host")
     parser.add_argument('--server_port', type=int, help="Port")
     parser.add_argument('--rom_id', type=str, help="ROM ID")
     parser.add_argument('--romcollection_id', type=str, help="ROM Collection ID")
-    parser.add_argument('--ael_addon_id', type=str, help="Addon configuration ID")
+    parser.add_argument('--akl_addon_id', type=str, help="Addon configuration ID")
     parser.add_argument('--settings', type=json.loads, help="Specific run setting")
     
     try:
@@ -80,7 +80,7 @@ def run_plugin():
 # ---------------------------------------------------------------------------------------------
 # Launcher methods.
 # ---------------------------------------------------------------------------------------------
-# Arguments: --ael_addon_id --rom_id
+# Arguments: --akl_addon_id --rom_id
 def launch_rom(args):
     logger.debug('App Launcher: Starting ...')
     
@@ -96,11 +96,11 @@ def launch_rom(args):
         addon_dir = kodi.getAddonDir()
         report_path = addon_dir.pjoin('reports')
         if not report_path.exists(): report_path.makedirs()    
-        report_path = report_path.pjoin('{}-{}.txt'.format(args.ael_addon_id, args.rom_id))
+        report_path = report_path.pjoin('{}-{}.txt'.format(args.akl_addon_id, args.rom_id))
         
         executor_factory = get_executor_factory(report_path)
         launcher = AppLauncher(
-            args.ael_addon_id, 
+            args.akl_addon_id, 
             args.romcollection_id, 
             args.rom_id, 
             args.server_host, 
@@ -113,12 +113,12 @@ def launch_rom(args):
         logger.error('Exception while executing ROM', exc_info=e)
         kodi.notify_error('Failed to execute ROM')    
 
-# Arguments: --ael_addon_id --romcollection_id | --rom_id
+# Arguments: --akl_addon_id --romcollection_id | --rom_id
 def configure_launcher(args):
     logger.debug('App Launcher: Configuring ...')
         
     launcher = AppLauncher(
-            args.ael_addon_id, 
+            args.akl_addon_id, 
             args.romcollection_id, 
             args.rom_id, 
             args.server_host, 
@@ -133,7 +133,7 @@ def configure_launcher(args):
 # ---------------------------------------------------------------------------------------------
 # Scanner methods.
 # ---------------------------------------------------------------------------------------------
-# Arguments: --ael_addon_id --romcollection_id --server_host --server_port
+# Arguments: --akl_addon_id --romcollection_id --server_host --server_port
 def scan_for_roms(args):
     logger.debug('ROM Folder scanner: Starting scan ...')
     progress_dialog = kodi.ProgressDialog()
@@ -143,7 +143,7 @@ def scan_for_roms(args):
             
     scanner = RomFolderScanner(
         report_path, 
-        args.ael_addon_id,
+        args.akl_addon_id,
         args.romcollection_id,
         args.server_host, 
         args.server_port, 
@@ -168,7 +168,7 @@ def scan_for_roms(args):
         
     kodi.notify('ROMs scanning done')
 
-# Arguments: --ael_addon_id (opt) --romcollection_id
+# Arguments: --akl_addon_id (opt) --romcollection_id
 def configure_scanner(args):
     logger.debug('ROM Folder scanner: Configuring ...')    
     addon_dir = kodi.getAddonDir()
@@ -176,7 +176,7 @@ def configure_scanner(args):
     
     scanner = RomFolderScanner(
         report_path, 
-        args.ael_addon_id,
+        args.akl_addon_id,
         args.romcollection_id, 
         args.server_host, 
         args.server_port, 
@@ -218,14 +218,14 @@ def run_scraper(args):
         scraped_rom = scraper_strategy.process_single_rom(args.rom_id)
         pdialog.endProgress()
         pdialog.startProgress('Saving ROM in database ...')
-        scraper_strategy.store_scraped_rom(args.ael_addon_id, args.rom_id, scraped_rom)
+        scraper_strategy.store_scraped_rom(args.akl_addon_id, args.rom_id, scraped_rom)
         pdialog.endProgress()
         
     if args.romcollection_id is not None:
         scraped_roms = scraper_strategy.process_collection(args.romcollection_id)
         pdialog.endProgress()
         pdialog.startProgress('Saving ROMs in database ...')
-        scraper_strategy.store_scraped_roms(args.ael_addon_id, args.romcollection_id, scraped_roms)
+        scraper_strategy.store_scraped_roms(args.akl_addon_id, args.romcollection_id, scraped_roms)
         pdialog.endProgress()
         
         
