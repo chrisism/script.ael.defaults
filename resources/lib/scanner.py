@@ -22,11 +22,11 @@ import typing
 import re
 import collections
 
-# --- AEL packages ---
-from ael import report, api
-from ael.utils import io, kodi
+# --- AKL packages ---
+from akl import report, api
+from akl.utils import io, kodi
 
-from ael.scanners import RomScannerStrategy, ROMCandidateABC, MultiDiscInfo
+from akl.scanners import RomScannerStrategy, ROMCandidateABC, MultiDiscInfo
 
 logger = logging.getLogger(__name__)
           

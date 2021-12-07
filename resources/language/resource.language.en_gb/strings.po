@@ -1,6 +1,6 @@
 # Kodi Media Center language file
 # Addon Name: Advanced Kodi Launcher : Default plugins
-# Addon id: script.ael.defaults
+# Addon id: script.akl.defaults
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"

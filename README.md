@@ -1,5 +1,5 @@
 # Advanced Kodi Launcher : Default plugins
-## script.ael.defaults
+## script.akl.defaults
 Default launchers, scanners and scrapers for AKL.
 
 | Release | Status |

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 from resources.lib.scanner import RomFolderScanner
 
-from ael.api import ROMObj
+from akl.api import ROMObj
 
 class Test_romscannerstests(unittest.TestCase):
     
@@ -31,7 +31,7 @@ class Test_romscannerstests(unittest.TestCase):
         print('TEST ASSETS DIR: {}'.format(cls.TEST_ASSETS_DIR))
         print('---------------------------------------------------------------------------')
     
-    @patch('ael.api.client_get_collection_scanner_settings')
+    @patch('akl.api.client_get_collection_scanner_settings')
     @patch('resources.lib.scanner.io.FileName.recursiveScanFilesInPath')
     def test_when_scanning_with_a_normal_rom_scanner_it_will_go_without_exceptions(self, recursive_scan_mock:MagicMock, api_settings_mock:MagicMock):
         
@@ -58,8 +58,8 @@ class Test_romscannerstests(unittest.TestCase):
         print(report_dir.getFakeContent())
     
     @patch('resources.lib.scanner.io.FileName.exists_python',autospec=True)   
-    @patch('ael.api.client_get_roms_in_collection')
-    @patch('ael.api.client_get_collection_scanner_settings')
+    @patch('akl.api.client_get_roms_in_collection')
+    @patch('akl.api.client_get_collection_scanner_settings')
     @patch('resources.lib.scanner.io.FileName.recursiveScanFilesInPath')
     def test_when_scanning_with_a_normal_rom_scanner_dead_roms_will_be_removed(self, 
             recursive_scan_mock:MagicMock, api_settings_mock:MagicMock, api_roms_mock:MagicMock, file_exists_mock:MagicMock):
@@ -96,8 +96,8 @@ class Test_romscannerstests(unittest.TestCase):
         print(report_dir.getFakeContent())
     
     @patch('resources.lib.scanner.io.FileName.exists_python', autospec=True)    
-    @patch('ael.api.client_get_roms_in_collection')
-    @patch('ael.api.client_get_collection_scanner_settings')
+    @patch('akl.api.client_get_roms_in_collection')
+    @patch('akl.api.client_get_collection_scanner_settings')
     @patch('resources.lib.scanner.io.FileName.recursiveScanFilesInPath')
     def test_when_scanning_with_a_normal_rom_scanner_multidiscs_will_be_put_together(self, 
             recursive_scan_mock:MagicMock, api_settings_mock:MagicMock, api_roms_mock:MagicMock, file_exists_mock:MagicMock):
@@ -140,8 +140,8 @@ class Test_romscannerstests(unittest.TestCase):
         self.assertEqual(expected, target.amount_of_scanned_roms())
     
     @patch('resources.lib.scanner.io.FileName.exists_python', autospec=True)    
-    @patch('ael.api.client_get_roms_in_collection')
-    @patch('ael.api.client_get_collection_scanner_settings')
+    @patch('akl.api.client_get_roms_in_collection')
+    @patch('akl.api.client_get_collection_scanner_settings')
     @patch('resources.lib.scanner.io.FileName.recursiveScanFilesInPath')
     def test_when_scanning_with_a_normal_rom_scanner_existing_items_wont_end_up_double(self, 
             recursive_scan_mock:MagicMock, api_settings_mock:MagicMock, api_roms_mock:MagicMock, file_exists_mock:MagicMock):        
@@ -184,8 +184,8 @@ class Test_romscannerstests(unittest.TestCase):
         self.assertEqual(expected, target.amount_of_scanned_roms())
         
     @patch('resources.lib.scanner.io.FileName.exists_python', autospec=True)    
-    @patch('ael.api.client_get_roms_in_collection')
-    @patch('ael.api.client_get_collection_scanner_settings')
+    @patch('akl.api.client_get_roms_in_collection')
+    @patch('akl.api.client_get_collection_scanner_settings')
     @patch('resources.lib.scanner.io.FileName.recursiveScanFilesInPath')
     def test_when_scanning_with_a_normal_rom_scanner_and_bios_roms_must_be_skipped_they_wont_be_added(self,
             recursive_scan_mock:MagicMock, api_settings_mock:MagicMock, api_roms_mock:MagicMock, file_exists_mock:MagicMock):

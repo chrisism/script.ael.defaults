@@ -11,10 +11,10 @@ logging.basicConfig(format = '%(asctime)s %(module)s %(levelname)s: %(message)s'
 logger = logging.getLogger(__name__)
 
 from resources.lib.scraper import LocalFilesScraper
-from ael.scrapers import ScrapeStrategy, ScraperSettings
+from akl.scrapers import ScrapeStrategy, ScraperSettings
 
-from ael.api import ROMObj
-from ael import constants
+from akl.api import ROMObj
+from akl import constants
 
 class Test_localfilesscraper(unittest.TestCase):
     
@@ -33,7 +33,7 @@ class Test_localfilesscraper(unittest.TestCase):
         logger.info('TEST ASSETS DIR: {}'.format(cls.TEST_ASSETS_DIR))
         logger.info('---------------------------------------------------------------------------')
 
-    @patch('ael.api.client_get_rom')
+    @patch('akl.api.client_get_rom')
     def test_scraping_metadata_for_game(self, api_rom_mock: MagicMock):        
         
         # arrange        
@@ -63,7 +63,7 @@ class Test_localfilesscraper(unittest.TestCase):
         self.assertEqual(u'Puzzle', actual.get_genre())
         logger.info(actual.get_data_dic())
         
-    @patch('ael.api.client_get_rom')
+    @patch('akl.api.client_get_rom')
     def test_when_scraping_with_nfoscraper_it_will_give_the_correct_result(self, api_rom_mock: MagicMock):    
     
         # arrange        
@@ -91,8 +91,8 @@ class Test_localfilesscraper(unittest.TestCase):
         self.assertEqual(expected, actual.get_name())
         logger.info(actual.get_data_dic())
         
-    @patch('ael.utils.io.FileName.scanFilesInPath')
-    @patch('ael.api.client_get_rom')
+    @patch('akl.utils.io.FileName.scanFilesInPath')
+    @patch('akl.api.client_get_rom')
     def test_when_scraping_local_assets_it_will_give_the_correct_result(self, api_rom_mock:MagicMock, file_mock:MagicMock):
         # arrange
         file_mock.return_value = [FakeFile('x.jpg'),FakeFile('y.jpg'), FakeFile('pitfall.jpg'), FakeFile('donkeykong.jpg')]

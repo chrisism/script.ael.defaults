@@ -19,11 +19,11 @@ from __future__ import division
 
 import logging
 
-# --- AEL packages ---
-from ael import constants
-from ael.utils import kodi
-from ael.scrapers import Scraper
-from ael.api import ROMObj
+# --- AKL packages ---
+from akl import constants
+from akl.utils import kodi
+from akl.scrapers import Scraper
+from akl.api import ROMObj
 
 logger = logging.getLogger(__name__)
 

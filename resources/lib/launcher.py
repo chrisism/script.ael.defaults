@@ -19,10 +19,10 @@ from __future__ import division
 import logging
 import collections
 
-# --- AEL packages ---
-from ael import platforms
-from ael.utils import io, kodi
-from ael.launchers import LauncherABC
+# --- AKL packages ---
+from akl import platforms
+from akl.utils import io, kodi
+from akl.launchers import LauncherABC
 
 logger = logging.getLogger(__name__)
 
