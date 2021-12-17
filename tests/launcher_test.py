@@ -98,8 +98,8 @@ class Test_Launcher(unittest.TestCase):
             factory_mock:MagicMock, api_settings_mock:MagicMock, api_rom_mock: MagicMock, filename_mock, kodi_mock):
 
         # arrange
-        expectedApp = 'C:\\Sparta\\Action.exe'
-        expectedArgs = 'this is C:\\Sparta\\'
+        expectedApp = '/Sparta/Action.exe'
+        expectedArgs = 'this is /Sparta/'
 
         launcher_settings = {}
         launcher_settings['id'] = 'ABC'
