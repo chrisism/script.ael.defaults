@@ -42,6 +42,7 @@ class ROMFileCandidate(ROMCandidateABC):
             'file': self.file.getPath(),
             'identifier': self.file.getBaseNoExt()
         }
+        rom.set_name(self.file.getBaseNoExt())
         rom.set_scanned_data(scanned_data)
         return rom
         
