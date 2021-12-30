@@ -146,15 +146,20 @@ class RomFolderScanner(RomScannerStrategy):
         files = []
         
         rom_path = self.get_rom_path()
+        self.progress_dialog.updateProgress(2)
         launcher_report.write('Scanning files in {}'.format(rom_path.getPath()))
 
         if self.scan_recursive():
             logger.info('Recursive scan activated')
-            files = rom_path.recursiveScanFilesInPath('*.*')
+            files = rom_path.recursiveScanFilesInPath('*.*',
+                self.progress_dialog.setSteps, 
+                self.progress_dialog.incrementStep)
         else:
             logger.info('Recursive scan not activated')
-            files = rom_path.scanFilesInPath('*.*')
-
+            files = rom_path.scanFilesInPath('*.*',
+                self.progress_dialog.setSteps, 
+                self.progress_dialog.incrementStep)
+        
         num_files = len(files)
         launcher_report.write('  File scanner found {} files'.format(num_files))
         self.progress_dialog.endProgress()

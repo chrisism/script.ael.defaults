@@ -38,8 +38,8 @@ class Test_localfilesscraper(unittest.TestCase):
         
         # arrange        
         settings = ScraperSettings()
-        settings.scrape_metadata_policy = constants.SCRAPE_POLICY_NFO_PREFERED
-        settings.scrape_assets_policy = constants.SCRAPE_ACTION_NONE
+        settings.scrape_metadata_policy = constants.SCRAPE_POLICY_LOCAL_ONLY
+        settings.scrape_assets_policy   = constants.SCRAPE_ACTION_NONE
                         
         rom_id = random_string(5)
         rom = ROMObj({
@@ -68,7 +68,7 @@ class Test_localfilesscraper(unittest.TestCase):
     
         # arrange        
         settings = ScraperSettings()
-        settings.scrape_metadata_policy = constants.SCRAPE_POLICY_NFO_PREFERED
+        settings.scrape_metadata_policy = constants.SCRAPE_POLICY_LOCAL_ONLY
         settings.scrape_assets_policy = constants.SCRAPE_ACTION_NONE
                 
         rom_id = random_string(5)

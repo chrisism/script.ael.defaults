@@ -202,7 +202,7 @@ def run_scraper(args):
     settings.overwrite_existing   = constants.SCRAPE_AUTOMATIC
     
     if settings.scrape_metadata_policy != constants.SCRAPE_ACTION_NONE:
-        settings.scrape_metadata_policy = constants.SCRAPE_POLICY_NFO_PREFERED
+        settings.scrape_metadata_policy = constants.SCRAPE_POLICY_LOCAL_ONLY
     if settings.scrape_assets_policy != constants.SCRAPE_ACTION_NONE:
         settings.scrape_assets_policy = constants.SCRAPE_POLICY_LOCAL_ONLY
     
