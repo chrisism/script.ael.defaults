@@ -216,10 +216,10 @@ class RomFolderScanner(RomScannerStrategy):
             self.progress_dialog.updateProgress(num_items_checked)
             
             # --- Get all file name combinations ---
-            launcher_report.write('>>> {0}'.format(ROM_file.getPath()))
+            launcher_report.write(f'>>> {ROM_file.getPath()}')
 
             # ~~~ Update progress dialog ~~~
-            file_text = 'ROM {0}'.format(ROM_file.getBase())
+            file_text = f'ROM {ROM_file.getBase()}'
             self.progress_dialog.updateMessage('{}\nChecking if has ROM extension ...'.format(file_text))
                         
             # --- Check if filename matchs ROM extensions ---
