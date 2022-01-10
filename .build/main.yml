@@ -84,8 +84,7 @@ stages:
 
       - bash: update_addon_news $(workingDirectory)/addon.xml $(workingDirectory)/changelog.txt
         displayName: 'Add changelog in addon.xml'
-        inputs:
-          workingDirectory: '$(workingDirectory)'
+        workingDirectory: '$(workingDirectory)'
 
       - bash: 'python -m pytest --junitxml=$(build.artifactstagingdirectory)/$(addonName)_$(packageVersion)_testresults.xml' 
         workingDirectory: '$(workingDirectory)'
