@@ -20,7 +20,7 @@ from __future__ import division
 import logging
 
 # --- AKL packages ---
-from akl import constants
+from akl import constants, settings
 from akl.utils import kodi
 from akl.scrapers import Scraper
 from akl.api import ROMObj
@@ -44,11 +44,8 @@ class LocalFilesScraper(Scraper):
      
     # --- Constructor ----------------------------------------------------------------------------
     def __init__(self):
-        self.addon_dir = kodi.getAddonDir()
-        logger.debug('LocalFilesScraper.__init__() addon dir "{}"'.format(self.addon_dir.getPath()))
-        cache_dir = self.addon_dir.pjoin('cache/', True) 
-        
-        super(LocalFilesScraper, self).__init__(cache_dir.getPath())
+        cache_dir = settings.getSetting('scraper_cache_dir')
+        super(LocalFilesScraper, self).__init__(cache_dir)
 
     # --- Base class abstract methods ------------------------------------------------------------
     def get_name(self): return 'Local files scraper'

@@ -1,6 +1,6 @@
 attrs==21.4.0
 iniconfig==1.1.1
-kodi.tools==1.0.0rc3
+kodi.tools==1.0.0
 Kodistubs==19.0.3
 packaging==21.3
 pkg_resources==0.0.0
@@ -8,5 +8,5 @@ pluggy==1.0.0
 py==1.11.0
 pyparsing==3.0.6
 pytest==6.2.5
-script.module.akl==1.0.1rc36
+script.module.akl==1.0.1rc46
 toml==0.10.2
