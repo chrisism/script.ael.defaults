@@ -8,7 +8,7 @@ logging.basicConfig(format = '%(asctime)s %(module)s %(levelname)s: %(message)s'
                 datefmt = '%m/%d/%Y %I:%M:%S %p', level = logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-from fakes import FakeFile, FakeExecutor, random_string
+from tests.fakes import FakeFile, FakeExecutor, random_string
 
 from resources.lib.launcher import AppLauncher
 from akl.launchers import ExecutionSettings
@@ -216,7 +216,7 @@ class Test_Launcher(unittest.TestCase):
     #     # assert        
     #     actual = launcher.__class__.__name__
     #     expected = 'StandardRomLauncher'
-    #     self.assertEqual(actual, expected)
+    #     assert actual == expected
                 
     # @patch('resources.objects.FileName', side_effect = FakeFile)
     # @patch('resources.objects.xbmcgui.Dialog.select')

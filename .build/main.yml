@@ -21,6 +21,7 @@
 trigger:
 - main
 - release/*
+- dev
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -61,37 +62,32 @@ stages:
         displayName: 'Setting version variables'
         condition: eq(${{variables.isMaster}}, true)
 
+      - task: UsePythonVersion@0
+        displayName: 'Use Python 3.x'
+
+      - bash: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        displayName: pip install 
+
       - task: RegExMatchReplace@2
         displayName: 'Set addon version'
         inputs:
           PathToFile: 'addon.xml'
           RegEx: 'version="\d+\.\d+\.\d+.*" provider'
           ValueToReplace: 'version="$(packageVersion)" provider'
-    
-      - task: PythonScript@0
+
+      - bash: merge-addon-xml $(workingDirectory)/addon.xml $(workingDirectory)/changelog.txt
         displayName: 'Add changelog in addon.xml'
         inputs:
-          scriptSource: 'inline'
-          arguments: '$(workingDirectory)/addon.xml $(workingDirectory)/changelog.txt'
-          script: |
-            import sys, os, re
-
-            addon_file = sys.argv[1]
-            changelog_file = sys.argv[2]
-            addon_xml = '' 
-            changelog_txt = ''
-            
-            with open(addon_file, 'r') as f:
-              addon_xml = f.read()
-            with open(changelog_file, 'r') as f:
-              changelog_txt = f.read()
-
-            changelog_txt = changelog_txt.replace('\n', '[CR]')
-            addon_xml = re.sub(r'<news>(.*)?</news>', f'<news>{changelog_txt}</news>', addon_xml)
-            with open(addon_file, 'w') as f:
-              f.write(addon_xml)
           workingDirectory: '$(workingDirectory)'
-          
+
+      - bash: 'python -m pytest --junitxml=$(build.artifactstagingdirectory)/$(addonName)_$(packageVersion)_testresults.xml' 
+        workingDirectory: '$(workingDirectory)'
+        #env:
+        #  PYTHONPATH: $(workingDirectory) 
+        displayName: 'Run tests'
+              
       - task: CopyFiles@2
         displayName: 'Copy addon files for package'
         inputs:
@@ -101,6 +97,7 @@ stages:
               *.md
               *.xml
               *.txt
+              !requirements.txt
               resources/**/*.*
               media/**/*.*
           TargetFolder: '$(build.artifactstagingdirectory)/$(addonName)/'
@@ -142,6 +139,13 @@ stages:
           PathtoPublish: '$(build.artifactstagingdirectory)/package/'
           ArtifactName: '$(addonName)'
           publishLocation: 'Container'
+          
+      - task: PublishTestResults@2
+        displayName: 'Publish test result'
+        inputs:
+          testResultsFiles: '$(build.artifactstagingdirectory)/$(addonName)_$(packageVersion)_testresults.xml'
+          testRunTitle: $(addonName)_$(packageVersion)
+        condition: succeededOrFailed()
 
 - stage: DeployStaging
   displayName: Deployment on Staging

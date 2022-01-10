@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import logging
 
-from fakes import FakeProgressDialog, random_string, FakeFile
+from tests.fakes import FakeProgressDialog, random_string, FakeFile
 
 logging.basicConfig(format = '%(asctime)s %(module)s %(levelname)s: %(message)s',
                 datefmt = '%m/%d/%Y %I:%M:%S %p', level = logging.DEBUG)
@@ -128,7 +128,7 @@ class Test_localfilesscraper(unittest.TestCase):
         logger.info(actual.get_data_dic()) 
         
         self.assertTrue(actual.entity_data['assets'][constants.ASSET_TITLE_ID], 'No title defined')
-        self.assertEquals(actual.entity_data['assets'][constants.ASSET_TITLE_ID], expected)
+        self.assertEqual(actual.entity_data['assets'][constants.ASSET_TITLE_ID], expected)
         
     # def test_scraping_metadata_for_game(self):
         
