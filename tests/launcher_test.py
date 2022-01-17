@@ -8,11 +8,11 @@ logging.basicConfig(format = '%(asctime)s %(module)s %(levelname)s: %(message)s'
                 datefmt = '%m/%d/%Y %I:%M:%S %p', level = logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-from fakes import FakeFile, FakeExecutor, random_string
+from tests.fakes import FakeFile, FakeExecutor, random_string
 
 from resources.lib.launcher import AppLauncher
-from ael.launchers import ExecutionSettings
-from ael.api import ROMObj
+from akl.launchers import ExecutionSettings
+from akl.api import ROMObj
 
 class Test_Launcher(unittest.TestCase):
     
@@ -46,11 +46,11 @@ class Test_Launcher(unittest.TestCase):
     #    # assert
     #    self.assertIsNone(actual)
                 
-    @patch('ael.launchers.kodi', autospec=True)
-    @patch('ael.utils.io.FileName', side_effect = FakeFile)
-    @patch('ael.api.client_get_rom')
-    @patch('ael.api.client_get_collection_launcher_settings')
-    @patch('ael.executors.ExecutorFactory')
+    @patch('akl.launchers.kodi', autospec=True)
+    @patch('akl.utils.io.FileName', side_effect = FakeFile)
+    @patch('akl.api.client_get_rom')
+    @patch('akl.api.client_get_collection_launcher_settings')
+    @patch('akl.executors.ExecutorFactory')
     def test_if_app_launcher_will_correctly_passthrough_parameters_when_launching(self, 
             factory_mock:MagicMock, api_settings_mock:MagicMock, api_rom_mock: MagicMock, filename_mock, kodi_mock):
        
@@ -89,17 +89,17 @@ class Test_Launcher(unittest.TestCase):
         self.assertIsNotNone(mock.actualArgs)
         self.assertEqual(expectedArgs, mock.actualArgs)
         
-    @patch('ael.launchers.kodi', autospec=True)
-    @patch('ael.utils.io.FileName', side_effect = FakeFile)
-    @patch('ael.api.client_get_rom')
-    @patch('ael.api.client_get_collection_launcher_settings')
-    @patch('ael.executors.ExecutorFactory')    
+    @patch('akl.launchers.kodi', autospec=True)
+    @patch('akl.utils.io.FileName', side_effect = FakeFile)
+    @patch('akl.api.client_get_rom')
+    @patch('akl.api.client_get_collection_launcher_settings')
+    @patch('akl.executors.ExecutorFactory')    
     def test_if_app_launcher_will_correctly_alter_arguments_when_launching(self, 
             factory_mock:MagicMock, api_settings_mock:MagicMock, api_rom_mock: MagicMock, filename_mock, kodi_mock):
 
         # arrange
-        expectedApp = 'C:\\Sparta\\Action.exe'
-        expectedArgs = 'this is C:\\Sparta\\'
+        expectedApp = '/Sparta/Action.exe'
+        expectedArgs = 'this is /Sparta/'
 
         launcher_settings = {}
         launcher_settings['id'] = 'ABC'
@@ -134,11 +134,11 @@ class Test_Launcher(unittest.TestCase):
         self.assertIsNotNone(mock.actualArgs)
         self.assertEqual(expectedArgs, mock.actualArgs)
                           
-    @patch('ael.launchers.kodi', autospec=True)
-    @patch('ael.utils.io.FileName', side_effect = FakeFile)
-    @patch('ael.api.client_get_rom')
-    @patch('ael.api.client_get_collection_launcher_settings')
-    @patch('ael.executors.ExecutorFactory')    
+    @patch('akl.launchers.kodi', autospec=True)
+    @patch('akl.utils.io.FileName', side_effect = FakeFile)
+    @patch('akl.api.client_get_rom')
+    @patch('akl.api.client_get_collection_launcher_settings')
+    @patch('akl.executors.ExecutorFactory')    
     def test_if_rom_launcher_will_correctly_passthrough_the_application_when_launching(self, 
             factory_mock:MagicMock, api_settings_mock:MagicMock, api_rom_mock: MagicMock, filename_mock, kodi_mock):
         
@@ -216,7 +216,7 @@ class Test_Launcher(unittest.TestCase):
     #     # assert        
     #     actual = launcher.__class__.__name__
     #     expected = 'StandardRomLauncher'
-    #     self.assertEqual(actual, expected)
+    #     assert actual == expected
                 
     # @patch('resources.objects.FileName', side_effect = FakeFile)
     # @patch('resources.objects.xbmcgui.Dialog.select')

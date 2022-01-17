@@ -22,11 +22,11 @@ import typing
 import re
 import collections
 
-# --- AEL packages ---
-from ael import report, api
-from ael.utils import io, kodi
+# --- AKL packages ---
+from akl import report, api
+from akl.utils import io, kodi
 
-from ael.scanners import RomScannerStrategy, ROMCandidateABC, MultiDiscInfo
+from akl.scanners import RomScannerStrategy, ROMCandidateABC, MultiDiscInfo
 
 logger = logging.getLogger(__name__)
           
@@ -42,6 +42,7 @@ class ROMFileCandidate(ROMCandidateABC):
             'file': self.file.getPath(),
             'identifier': self.file.getBaseNoExt()
         }
+        rom.set_name(self.file.getBaseNoExt())
         rom.set_scanned_data(scanned_data)
         return rom
         
@@ -145,15 +146,20 @@ class RomFolderScanner(RomScannerStrategy):
         files = []
         
         rom_path = self.get_rom_path()
+        self.progress_dialog.updateProgress(2)
         launcher_report.write('Scanning files in {}'.format(rom_path.getPath()))
 
         if self.scan_recursive():
             logger.info('Recursive scan activated')
-            files = rom_path.recursiveScanFilesInPath('*.*')
+            files = rom_path.recursiveScanFilesInPath('*.*',
+                self.progress_dialog.setSteps, 
+                self.progress_dialog.incrementStep)
         else:
             logger.info('Recursive scan not activated')
-            files = rom_path.scanFilesInPath('*.*')
-
+            files = rom_path.scanFilesInPath('*.*',
+                self.progress_dialog.setSteps, 
+                self.progress_dialog.incrementStep)
+        
         num_files = len(files)
         launcher_report.write('  File scanner found {} files'.format(num_files))
         self.progress_dialog.endProgress()
@@ -210,10 +216,10 @@ class RomFolderScanner(RomScannerStrategy):
             self.progress_dialog.updateProgress(num_items_checked)
             
             # --- Get all file name combinations ---
-            launcher_report.write('>>> {0}'.format(ROM_file.getPath()))
+            launcher_report.write(f'>>> {ROM_file.getPath()}')
 
             # ~~~ Update progress dialog ~~~
-            file_text = 'ROM {0}'.format(ROM_file.getBase())
+            file_text = f'ROM {ROM_file.getBase()}'
             self.progress_dialog.updateMessage('{}\nChecking if has ROM extension ...'.format(file_text))
                         
             # --- Check if filename matchs ROM extensions ---

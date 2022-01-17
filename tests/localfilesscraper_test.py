@@ -4,22 +4,31 @@ from unittest.mock import MagicMock, patch
 
 import logging
 
-from fakes import FakeProgressDialog, random_string, FakeFile
+from tests.fakes import FakeProgressDialog, random_string, FakeFile
 
 logging.basicConfig(format = '%(asctime)s %(module)s %(levelname)s: %(message)s',
                 datefmt = '%m/%d/%Y %I:%M:%S %p', level = logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 from resources.lib.scraper import LocalFilesScraper
-from ael.scrapers import ScrapeStrategy, ScraperSettings
+from akl.scrapers import ScrapeStrategy, ScraperSettings
 
-from ael.api import ROMObj
-from ael import constants
+from akl.api import ROMObj
+from akl.utils import io
+from akl import constants
+
+def get_setting(key:str):
+    if key == 'scraper_cache_dir': return Test_localfilesscraper.TEST_OUTPUT_DIR
+    return ''
+
+def get_addon_dir(): 
+    return io.FileName(Test_localfilesscraper.TEST_OUTPUT_DIR, isdir=True)
 
 class Test_localfilesscraper(unittest.TestCase):
     
     ROOT_DIR = ''
     TEST_DIR = ''
+    TEST_OUTPUT_DIR = ''
     TEST_ASSETS_DIR = ''
 
     @classmethod
@@ -27,25 +36,24 @@ class Test_localfilesscraper(unittest.TestCase):
         cls.TEST_DIR = os.path.dirname(os.path.abspath(__file__))
         cls.ROOT_DIR = os.path.abspath(os.path.join(cls.TEST_DIR, os.pardir))
         cls.TEST_ASSETS_DIR = os.path.abspath(os.path.join(cls.TEST_DIR,'assets/'))
-                
-        logger.info('ROOT DIR: {}'.format(cls.ROOT_DIR))
-        logger.info('TEST DIR: {}'.format(cls.TEST_DIR))
-        logger.info('TEST ASSETS DIR: {}'.format(cls.TEST_ASSETS_DIR))
-        logger.info('---------------------------------------------------------------------------')
+        cls.TEST_OUTPUT_DIR = os.path.abspath(os.path.join(cls.TEST_DIR,'output/'))
 
-    @patch('ael.api.client_get_rom')
-    def test_scraping_metadata_for_game(self, api_rom_mock: MagicMock):        
-        
+        if not os.path.exists(cls.TEST_OUTPUT_DIR): os.makedirs(cls.TEST_OUTPUT_DIR)
+
+    @patch('akl.scrapers.kodi.getAddonDir', autospec=True, side_effect=get_addon_dir)
+    @patch('akl.scrapers.settings.getSetting', autospec=True, side_effect=get_setting)
+    @patch('akl.api.client_get_rom')
+    def test_scraping_metadata_for_game(self, api_rom_mock: MagicMock, settings_mock, addon_dir):        
         # arrange        
         settings = ScraperSettings()
-        settings.scrape_metadata_policy = constants.SCRAPE_POLICY_NFO_PREFERED
-        settings.scrape_assets_policy = constants.SCRAPE_ACTION_NONE
+        settings.scrape_metadata_policy = constants.SCRAPE_POLICY_LOCAL_ONLY
+        settings.scrape_assets_policy   = constants.SCRAPE_ACTION_NONE
                         
         rom_id = random_string(5)
         rom = ROMObj({
             'id': rom_id,
             'scanned_data': {
-                'file': Test_localfilesscraper.TEST_ASSETS_DIR + '\\dr_mario.zip'
+                'file': Test_localfilesscraper.TEST_ASSETS_DIR + '/dr_mario.zip'
             }
         })
         api_rom_mock.return_value = rom
@@ -63,19 +71,21 @@ class Test_localfilesscraper(unittest.TestCase):
         self.assertEqual(u'Puzzle', actual.get_genre())
         logger.info(actual.get_data_dic())
         
-    @patch('ael.api.client_get_rom')
-    def test_when_scraping_with_nfoscraper_it_will_give_the_correct_result(self, api_rom_mock: MagicMock):    
+    @patch('akl.scrapers.kodi.getAddonDir', autospec=True, side_effect=get_addon_dir)
+    @patch('akl.scrapers.settings.getSetting', autospec=True, side_effect=get_setting)
+    @patch('akl.api.client_get_rom')
+    def test_when_scraping_with_nfoscraper_it_will_give_the_correct_result(self, api_rom_mock: MagicMock, settings_mock, addon_mock):    
     
         # arrange        
         settings = ScraperSettings()
-        settings.scrape_metadata_policy = constants.SCRAPE_POLICY_NFO_PREFERED
+        settings.scrape_metadata_policy = constants.SCRAPE_POLICY_LOCAL_ONLY
         settings.scrape_assets_policy = constants.SCRAPE_ACTION_NONE
                 
         rom_id = random_string(5)
         rom = ROMObj({
             'id': rom_id,
             'scanned_data': {
-                'file':  Test_localfilesscraper.TEST_ASSETS_DIR + '\\pitfall.zip'
+                'file':  Test_localfilesscraper.TEST_ASSETS_DIR + '/pitfall.zip'
             }
         })
         api_rom_mock.return_value = rom
@@ -91,9 +101,12 @@ class Test_localfilesscraper(unittest.TestCase):
         self.assertEqual(expected, actual.get_name())
         logger.info(actual.get_data_dic())
         
-    @patch('ael.utils.io.FileName.scanFilesInPath')
-    @patch('ael.api.client_get_rom')
-    def test_when_scraping_local_assets_it_will_give_the_correct_result(self, api_rom_mock:MagicMock, file_mock:MagicMock):
+    @patch('akl.scrapers.kodi.getAddonDir', autospec=True, side_effect=get_addon_dir)
+    @patch('akl.scrapers.settings.getSetting', autospec=True, side_effect=get_setting)
+    @patch('akl.utils.io.FileName.scanFilesInPath')
+    @patch('akl.api.client_get_rom')
+    def test_when_scraping_local_assets_it_will_give_the_correct_result(self, 
+        api_rom_mock:MagicMock, file_mock:MagicMock, settings_mock, addon_mock):
         # arrange
         file_mock.return_value = [FakeFile('x.jpg'),FakeFile('y.jpg'), FakeFile('pitfall.jpg'), FakeFile('donkeykong.jpg')]
 
@@ -128,7 +141,7 @@ class Test_localfilesscraper(unittest.TestCase):
         logger.info(actual.get_data_dic()) 
         
         self.assertTrue(actual.entity_data['assets'][constants.ASSET_TITLE_ID], 'No title defined')
-        self.assertEquals(actual.entity_data['assets'][constants.ASSET_TITLE_ID], expected)
+        self.assertEqual(actual.entity_data['assets'][constants.ASSET_TITLE_ID], expected)
         
     # def test_scraping_metadata_for_game(self):
         
