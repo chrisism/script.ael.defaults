@@ -153,6 +153,24 @@ stages:
           testRunTitle: $(addonName)_$(packageVersion)
         condition: succeededOrFailed()
 
+      - task: GithubRelease@1 
+        displayName: 'Create GitHub Release'
+        #condition: and(succeeded(), eq(${{variables.isMaster}}, true))
+        inputs:
+          gitHubConnection: 'github.com_chrisism'
+          repositoryName: chrisism/script.akl.defaults
+          action: 'create'
+          target: '$(Build.SourceVersion)'
+          tagSource: 'userSpecifiedTag'
+          tag: $(packageVersion)
+          title: $(Build.BuildNumber)
+          releaseNotesSource: filePath
+          releaseNotesFilePath: $(workingDirectory)/release.md  
+          addChangeLog: true
+          assets: |
+            $(build.artifactstagingdirectory)/package/*.*
+            $(workingDirectory)/changelog.txt
+
 - stage: DeployStaging
   displayName: Deployment on Staging
   condition: and(succeeded(), or(eq(${{variables.isReleaseCandidate}}, true),eq(${{variables.isHotfix}}, true),eq(${{variables.isMaster}}, true)))
@@ -169,6 +187,8 @@ stages:
           value: repository.chrisism.dev
         - name: repository_data_dir
           value: 'matrix'
+        - name: branch_name
+          value: main
 
       strategy:     
         runOnce:
@@ -192,6 +212,8 @@ stages:
           value: repository.chrisism
         - name: repository_data_dir
           value: 'matrix'
+        - name: branch_name
+          value: master
 
       strategy:     
         runOnce:
