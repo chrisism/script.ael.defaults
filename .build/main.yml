@@ -31,8 +31,9 @@ variables:
   isReleaseCandidate: ${{startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')}}
   isHotfix: ${{startsWith(variables['Build.SourceBranch'], 'refs/heads/hotfix/')}}
   isDev: ${{eq(variables['Build.SourceBranch'], 'refs/heads/dev')}}
-  workingDirectory: '$(Build.SourcesDirectory)'
+  isPR: ${{startsWith(variables['Build.SourceBranch'], 'refs/pull/')}}
   addonName: script.akl.defaults
+  workingDirectory: '$(Build.SourcesDirectory)'
 
 stages:
 - stage: Build
