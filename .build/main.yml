@@ -88,8 +88,6 @@ stages:
 
       - bash: 'python -m pytest --junitxml=$(build.artifactstagingdirectory)/$(addonName)_$(packageVersion)_testresults.xml' 
         workingDirectory: '$(workingDirectory)'
-        #env:
-        #  PYTHONPATH: $(workingDirectory) 
         displayName: 'Run tests'
               
       - task: CopyFiles@2
@@ -155,17 +153,17 @@ stages:
 
       - task: GithubRelease@1 
         displayName: 'Create GitHub Release'
-        #condition: and(succeeded(), eq(${{variables.isMaster}}, true))
+        condition: and(succeeded(), eq(${{variables.isMaster}}, true))
         inputs:
           gitHubConnection: 'github.com_chrisism'
-          repositoryName: chrisism/script.akl.defaults
+          repositoryName: chrisism/$(addonName)
           action: 'create'
           target: '$(Build.SourceVersion)'
           tagSource: 'userSpecifiedTag'
           tag: $(packageVersion)
           title: $(Build.BuildNumber)
           releaseNotesSource: filePath
-          releaseNotesFilePath: $(workingDirectory)/release.md  
+          releaseNotesFilePath: $(workingDirectory)/changelog.md  
           addChangeLog: true
           assets: |
             $(build.artifactstagingdirectory)/package/*.*

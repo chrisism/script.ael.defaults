@@ -1,6 +1,6 @@
 # Advanced Kodi Launcher : Default plugins
 
-Default launchers, scanners and scrapers for AKL.
+Default launchers, scanners and scrapers for AKL. This plugin can be used to create and launch basic ROM collections based on files and application available on your system.
 
 | Release | Status |
 |----|----|
