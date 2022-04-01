@@ -37,6 +37,11 @@
                     <default>false</default>
                     <control type="toggle"/>
                 </setting>
+                <setting id="suspend_joystick" type="boolean" label="30130" help="">
+                    <level>0</level>
+                    <default>false</default>
+                    <control type="toggle"/>
+                </setting>
                 <setting id="escape_romfile" type="boolean" label="30125" help="">
                     <level>0</level>
                     <default>false</default>
