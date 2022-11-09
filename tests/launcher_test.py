@@ -87,7 +87,7 @@ class Test_Launcher(unittest.TestCase):
         self.assertIsNotNone(mock.actualApplication)
         self.assertEqual(expectedApp, mock.actualApplication)        
         self.assertIsNotNone(mock.actualArgs)
-        self.assertEqual(expectedArgs, mock.actualArgs)
+        self.assertEqual(expectedArgs, mock.actualArgs[0])
         
     @patch('akl.launchers.kodi', autospec=True)
     @patch('akl.utils.io.FileName', side_effect = FakeFile)
@@ -132,7 +132,7 @@ class Test_Launcher(unittest.TestCase):
         self.assertIsNotNone(mock.actualApplication)
         self.assertEqual(expectedApp, mock.actualApplication)        
         self.assertIsNotNone(mock.actualArgs)
-        self.assertEqual(expectedArgs, mock.actualArgs)
+        self.assertEqual(expectedArgs, ' '.join(mock.actualArgs))
                           
     @patch('akl.launchers.kodi', autospec=True)
     @patch('akl.utils.io.FileName', side_effect = FakeFile)
@@ -171,9 +171,15 @@ class Test_Launcher(unittest.TestCase):
         target.launch()       
 
         # assert
+        expectedArgsArray = expectedArgs.split(" ")
+
         self.assertIsNotNone(mock.actualApplication)
         self.assertEqual(expected, mock.actualApplication)
-        self.assertEqual(expectedArgs, mock.actualArgs)
+        self.assertEqual(len(expectedArgsArray), len(mock.actualArgs))
+        self.assertEqual(expectedArgsArray[0], mock.actualArgs[0])
+        self.assertEqual(expectedArgsArray[1], mock.actualArgs[1])
+        self.assertEqual(expectedArgsArray[2], mock.actualArgs[2])
+        self.assertEqual(expectedArgsArray[3], mock.actualArgs[3])
                 
     # @patch('resources.objects.FileName', side_effect = FakeFile)
     # @patch('resources.objects.ExecutorFactory')
