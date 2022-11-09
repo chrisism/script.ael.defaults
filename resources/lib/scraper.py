@@ -44,7 +44,7 @@ class LocalFilesScraper(Scraper):
      
     # --- Constructor ----------------------------------------------------------------------------
     def __init__(self):
-        cache_dir = settings.getSetting('scraper_cache_dir')
+        cache_dir = settings.getSettingAsFilePath('scraper_cache_dir')
         super(LocalFilesScraper, self).__init__(cache_dir)
 
     # --- Base class abstract methods ------------------------------------------------------------

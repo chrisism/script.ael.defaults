@@ -40,8 +40,8 @@ class Test_localfilesscraper(unittest.TestCase):
 
         if not os.path.exists(cls.TEST_OUTPUT_DIR): os.makedirs(cls.TEST_OUTPUT_DIR)
 
-    @patch('akl.scrapers.kodi.getAddonDir', autospec=True, side_effect=get_addon_dir)
-    @patch('akl.scrapers.settings.getSetting', autospec=True, side_effect=get_setting)
+    @patch('akl.scrapers.kodi.getAddonDir', autospec=True, return_value=FakeFile("/test"))
+    @patch('akl.scrapers.settings.getSettingAsFilePath', autospec=True, return_value=FakeFile("/test"))
     @patch('akl.api.client_get_rom')
     def test_scraping_metadata_for_game(self, api_rom_mock: MagicMock, settings_mock, addon_dir):        
         # arrange        
@@ -71,8 +71,8 @@ class Test_localfilesscraper(unittest.TestCase):
         self.assertEqual(u'Puzzle', actual.get_genre())
         logger.info(actual.get_data_dic())
         
-    @patch('akl.scrapers.kodi.getAddonDir', autospec=True, side_effect=get_addon_dir)
-    @patch('akl.scrapers.settings.getSetting', autospec=True, side_effect=get_setting)
+    @patch('akl.scrapers.kodi.getAddonDir', autospec=True, return_value=FakeFile("/test"))
+    @patch('akl.scrapers.settings.getSettingAsFilePath', autospec=True, return_value=FakeFile("/test"))
     @patch('akl.api.client_get_rom')
     def test_when_scraping_with_nfoscraper_it_will_give_the_correct_result(self, api_rom_mock: MagicMock, settings_mock, addon_mock):    
     
@@ -101,8 +101,8 @@ class Test_localfilesscraper(unittest.TestCase):
         self.assertEqual(expected, actual.get_name())
         logger.info(actual.get_data_dic())
         
-    @patch('akl.scrapers.kodi.getAddonDir', autospec=True, side_effect=get_addon_dir)
-    @patch('akl.scrapers.settings.getSetting', autospec=True, side_effect=get_setting)
+    @patch('akl.scrapers.kodi.getAddonDir', autospec=True, return_value=FakeFile("/test"))
+    @patch('akl.scrapers.settings.getSettingAsFilePath', autospec=True, return_value=FakeFile("/test"))
     @patch('akl.utils.io.FileName.scanFilesInPath')
     @patch('akl.api.client_get_rom')
     def test_when_scraping_local_assets_it_will_give_the_correct_result(self, 

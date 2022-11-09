@@ -48,7 +48,8 @@ class AppLauncher(LauncherABC):
     # Creates a new launcher using a wizard of dialogs. Called by parent build() method.
     #
     def _builder_get_wizard(self, wizard):    
-        wizard = kodi.WizardDialog_FileBrowse(wizard, 'application', 'Select the launcher application', 1, self._builder_get_appbrowser_filter)
+        wizard = kodi.WizardDialog_FileBrowse(wizard, 'application', 'Select the launcher application', 
+            1, self._builder_get_appbrowser_filter, shares="programs")
         wizard = kodi.WizardDialog_Dummy(wizard, 'args', '', self._builder_get_arguments_from_application_path)
         wizard = kodi.WizardDialog_Keyboard(wizard, 'args', 'Application arguments')
         
@@ -58,7 +59,7 @@ class AppLauncher(LauncherABC):
         self.non_blocking = True
         app = self.launcher_settings['application']
         app_FN = io.FileName(app)
-        
+
         self.launcher_settings['secname'] = app_FN.getBase()
         return True
     

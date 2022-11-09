@@ -10,7 +10,7 @@ def random_string(length:int):
 
 class FakeFile(io.FileName):
 
-    def __init__(self, pathString):
+    def __init__(self, pathString, isdir=False):
         self.fakeContent  = ''
         self.path_str     = pathString
         self.path_tr      = pathString       
@@ -48,13 +48,10 @@ class FakeFile(io.FileName):
     def writeAll(self, bytes, flags='w'):
         self.fakeContent = self.fakeContent + bytes
 
-    def pjoin(self, *args):
-        child = FakeFile(self.path_str)
+
+    def pjoin(self, path_str, isdir = False):
+        child = FakeFile(os.path.join(path_str, self.path_str),isdir)
         child.setFakeContent(self.fakeContent)
-        for arg in args:
-            child.path_str = os.path.join(child.path_str, arg)
-            child.path_tr = os.path.join(child.path_tr, arg)
-            
         return child      
 
     def changeExtension(self, targetExt):
@@ -75,6 +72,7 @@ class FakeExecutor(ExecutorABC):
     def __init__(self):
         self.actualApplication = None
         self.actualArgs = None
+        self.actualKwargs = None
         super(FakeExecutor, self).__init__(None)
         
     def getActualApplication(self):
@@ -83,9 +81,13 @@ class FakeExecutor(ExecutorABC):
     def getActualArguments(self):
         return self.actualArgs
 
-    def execute(self, application, arguments, non_blocking):
+    def getActualKwargs(self):
+        return self.actualKwargs
+
+    def execute(self, application, *args, **kwargs):
         self.actualApplication = application
-        self.actualArgs = arguments
+        self.actualArgs = list(args)
+        self.actualKwargs = dict(kwargs)
         pass        
 
 class FakeProgressDialog(ProgressDialog):
