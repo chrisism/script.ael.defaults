@@ -72,6 +72,7 @@ class FakeExecutor(ExecutorABC):
     def __init__(self):
         self.actualApplication = None
         self.actualArgs = None
+        self.actualKwargs = None
         super(FakeExecutor, self).__init__(None)
         
     def getActualApplication(self):
@@ -80,9 +81,13 @@ class FakeExecutor(ExecutorABC):
     def getActualArguments(self):
         return self.actualArgs
 
-    def execute(self, application, arguments, non_blocking):
+    def getActualKwargs(self):
+        return self.actualKwargs
+
+    def execute(self, application, *args, **kwargs):
         self.actualApplication = application
-        self.actualArgs = arguments
+        self.actualArgs = list(args)
+        self.actualKwargs = dict(kwargs)
         pass        
 
 class FakeProgressDialog(ProgressDialog):
