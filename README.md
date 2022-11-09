@@ -5,7 +5,6 @@ Default launchers, scanners and scrapers for AKL. This plugin can be used to cre
 | Release | Status |
 |----|----|
 | Stable | [![Build Status](https://dev.azure.com/jnpro/AKL/_apis/build/status/script.akl.defaults?branchName=main)](https://dev.azure.com/jnpro/AKL/_build/latest?definitionId=6&branchName=main)|
-| Beta | [![Build Status](https://dev.azure.com/jnpro/AKL/_apis/build/status/script.akl.defaults?branchName=release/1.0.0)](https://dev.azure.com/jnpro/AKL/_build/latest?definitionId=6&branchName=release/1.0.0)|
 | Unstable | [![Build Status](https://dev.azure.com/jnpro/AKL/_apis/build/status/script.akl.defaults?branchName=dev)](https://dev.azure.com/jnpro/AKL/_build/latest?definitionId=6&branchName=dev)|
 
 ### Kodi forum thread ###
