@@ -3,7 +3,6 @@
   <requires>
       <import addon="xbmc.python" version="3.0.0"/>
       <import addon="script.module.akl" version="1.0.8"/>
-      <import addon="plugin.program.akl" version="1.1.0"/>
   </requires>
   <extension point="xbmc.python.script" library="default.py">
       <provides>game</provides>
