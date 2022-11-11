@@ -21,6 +21,7 @@
 trigger:
 - main
 - release/*
+- hotfix/*
 - dev
 
 pool:
