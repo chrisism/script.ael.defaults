@@ -80,7 +80,7 @@ class AppLauncher(LauncherABC):
     def _change_application(self):
         current_application = self.launcher_settings['application']
         selected_application = kodi.browse(1, 'Select the launcher application', 'files',
-                                            '', False, False, current_application)
+                                            '', current_application, False, False)
 
         if selected_application is None or selected_application == current_application:
             return
