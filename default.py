@@ -195,7 +195,6 @@ def configure_scanner(args):
     
     scanner = RomFolderScanner(
         report_path,
-        args.akl_addon_id,
         args.library_id if args.library_id else args.romcollection_id,
         args.server_host,
         args.server_port,
