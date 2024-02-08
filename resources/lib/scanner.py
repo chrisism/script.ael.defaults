@@ -29,7 +29,8 @@ from akl.utils import io, kodi
 from akl.scanners import RomScannerStrategy, ROMCandidateABC, MultiDiscInfo
 
 logger = logging.getLogger(__name__)
-          
+
+
 class ROMFileCandidate(ROMCandidateABC):
     
     def __init__(self, file: io.FileName):
@@ -48,25 +49,28 @@ class ROMFileCandidate(ROMCandidateABC):
         
     def get_sort_value(self):
         return self.file.getBase()
-      
+
+
 class RomFolderScanner(RomScannerStrategy):
     
     # --------------------------------------------------------------------------------------------
     # Core methods
     # --------------------------------------------------------------------------------------------
-    def get_name(self) -> str: return 'Folder scanner'
+    def get_name(self) -> str:
+        return 'Folder scanner'
     
-    def get_scanner_addon_id(self) -> str: 
+    def get_scanner_addon_id(self) -> str:
         addon_id = kodi.get_addon_id()
         return addon_id
 
     def get_rom_path(self) -> io.FileName:
         str_rom_path = self.scanner_settings['rompath'] if 'rompath' in self.scanner_settings else None
-        if str_rom_path is None: return io.FileName("/")
+        if str_rom_path is None:
+            return io.FileName("/")
         return io.FileName(str_rom_path)
 
-    def get_rom_extensions(self) -> list:        
-        if not 'romext' in self.scanner_settings:
+    def get_rom_extensions(self) -> list:
+        if 'romext' not in self.scanner_settings:
             return []
         return self.scanner_settings['romext'].split("|")
     
@@ -81,12 +85,13 @@ class RomFolderScanner(RomScannerStrategy):
 
     def _configure_get_wizard(self, wizard) -> kodi.WizardDialog:
         
-        wizard = kodi.WizardDialog_FileBrowse(wizard, 'rompath', 'Select the ROMs path',0, '')
-        wizard = kodi.WizardDialog_YesNo(wizard, 'scan_recursive','Scan recursive', 'Scan through this directory and any subdirectories?')
+        wizard = kodi.WizardDialog_FileBrowse(wizard, 'rompath', 'Select the ROMs path', 0, '')
+        wizard = kodi.WizardDialog_YesNo(wizard, 'scan_recursive', 'Scan recursive', 'Scan through this directory and any subdirectories?')
         wizard = kodi.WizardDialog_Dummy(wizard, 'romext', '', self.configuration_get_extensions_from_launchers)
-        wizard = kodi.WizardDialog_Keyboard(wizard, 'romext','Set files extensions, use "|" as separator. (e.g lnk|cbr)')
-        wizard = kodi.WizardDialog_YesNo(wizard, 'multidisc','Supports multi-disc ROMs?', 'Does this ROM collection contain multi-disc ROMS?')
-        wizard = kodi.WizardDialog_YesNo(wizard, 'ignore_bios','Ignore BIOS', 'Ignore any BIOS file found during scanning?')
+        wizard = kodi.WizardDialog_Keyboard(wizard, 'romext', 'Set files extensions, use "|" as separator. (e.g lnk|cbr)')
+        wizard = kodi.WizardDialog_YesNo(wizard, 'multidisc',
+                                         'Supports multi-disc ROMs?', 'Does this library contain multi-disc ROMS?')
+        wizard = kodi.WizardDialog_YesNo(wizard, 'ignore_bios', 'Ignore BIOS', 'Ignore any BIOS file found during scanning?')
         
         return wizard
       
@@ -97,15 +102,15 @@ class RomFolderScanner(RomScannerStrategy):
 
     def _configure_get_edit_options(self) -> dict:
         recursive_scan_str = 'ON' if self.scanner_settings['scan_recursive'] else 'OFF'
-        multidisc_str      = 'ON' if self.scanner_settings['multidisc'] else 'OFF'
-        bios_str           = 'ON' if self.scanner_settings['ignore_bios'] else 'OFF'
+        multidisc_str = 'ON' if self.scanner_settings['multidisc'] else 'OFF'
+        bios_str = 'ON' if self.scanner_settings['ignore_bios'] else 'OFF'
 
         options = collections.OrderedDict()
-        options[self._change_rompath]       = 'Change ROMs path ({})'.format(self.scanner_settings['rompath'])
-        options[self._change_rom_ext]       = "Modify ROM extensions: '{0}'".format(self.scanner_settings['romext'])
-        options[self._change_recursive_scan]= "Recursive scan: '{0}'".format(recursive_scan_str)
-        options[self._change_multidisc]     = "Multidisc ROM support (now {0})".format(multidisc_str)
-        options[self._change_ignore_bios]   = "Ignore any BIOS file (now {0})".format(bios_str)
+        options[self._change_rompath] = 'Change ROMs path ({})'.format(self.scanner_settings['rompath'])
+        options[self._change_rom_ext] = "Modify ROM extensions: '{0}'".format(self.scanner_settings['romext'])
+        options[self._change_recursive_scan] = "Recursive scan: '{0}'".format(recursive_scan_str)
+        options[self._change_multidisc] = "Multidisc ROM support (now {0})".format(multidisc_str)
+        options[self._change_ignore_bios] = "Ignore any BIOS file (now {0})".format(bios_str)
 
         return options
 
@@ -122,24 +127,25 @@ class RomFolderScanner(RomScannerStrategy):
         exts = self.scanner_settings['romext']
         exts = kodi.dialog_keyboard('Edit ROM extensions, use "|" as separator. (e.g lnk|cbr)', text=exts)
 
-        if exts is None: return
+        if exts is None:
+            return
         self.scanner_settings['romext'] = exts
 
     def _change_recursive_scan(self):
-        current_state = self.scanner_settings['scan_recursive'] 
+        current_state = self.scanner_settings['scan_recursive']
         self.scanner_settings['scan_recursive'] = not current_state
 
     def _change_multidisc(self):
-        current_state = self.scanner_settings['multidisc'] 
+        current_state = self.scanner_settings['multidisc']
         self.scanner_settings['multidisc'] = not current_state
 
     def _change_ignore_bios(self):
-        current_state = self.scanner_settings['ignore_bios'] 
+        current_state = self.scanner_settings['ignore_bios']
         self.scanner_settings['ignore_bios'] = not current_state
 
     # ---------------------------------------------------------------------------------------------
     # Execution methods
-    # ---------------------------------------------------------------------------------------------         
+    # ---------------------------------------------------------------------------------------------
     # ~~~ Scan for new files (*.*) and put them in a list ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     def _getCandidates(self, launcher_report: report.Reporter) -> typing.List[ROMCandidateABC]:
         self.progress_dialog.startProgress('Scanning and caching files in ROM path ...')
@@ -152,13 +158,13 @@ class RomFolderScanner(RomScannerStrategy):
         if self.scan_recursive():
             logger.info('Recursive scan activated')
             files = rom_path.recursiveScanFilesInPath('*.*',
-                self.progress_dialog.setSteps, 
-                self.progress_dialog.incrementStep)
+                                                      self.progress_dialog.setSteps,
+                                                      self.progress_dialog.incrementStep)
         else:
             logger.info('Recursive scan not activated')
             files = rom_path.scanFilesInPath('*.*',
-                self.progress_dialog.setSteps, 
-                self.progress_dialog.incrementStep)
+                                             self.progress_dialog.setSteps,
+                                             self.progress_dialog.incrementStep)
         
         num_files = len(files)
         launcher_report.write('  File scanner found {} files'.format(num_files))
@@ -167,11 +173,11 @@ class RomFolderScanner(RomScannerStrategy):
         return [*(ROMFileCandidate(f) for f in files)]
 
     # --- Get dead entries -----------------------------------------------------------------
-    def _getDeadRoms(self, candidates:typing.List[ROMCandidateABC], roms: typing.List[api.ROMObj]) -> typing.List[api.ROMObj]:
+    def _getDeadRoms(self, candidates: typing.List[ROMCandidateABC], roms: typing.List[api.ROMObj]) -> typing.List[api.ROMObj]:
         dead_roms = []
         num_roms = len(roms)
         if num_roms == 0:
-            logger.info('Collection is empty. No dead ROM check.')
+            logger.info('Library is empty. No dead ROM check.')
             return dead_roms
         
         logger.info('Starting dead items scan')
@@ -193,13 +199,13 @@ class RomFolderScanner(RomScannerStrategy):
         return dead_roms
 
     # ~~~ Now go processing item by item ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    def _processFoundItems(self, 
-                           candidates: typing.List[ROMCandidateABC], 
-                           roms:typing.List[api.ROMObj],
+    def _processFoundItems(self,
+                           candidates: typing.List[ROMCandidateABC],
+                           roms: typing.List[api.ROMObj],
                            launcher_report: report.Reporter) -> typing.List[api.ROMObj]:
 
-        num_items = len(candidates)    
-        new_roms:typing.List[api.ROMObj] = []
+        num_items = len(candidates)
+        new_roms: typing.List[api.ROMObj] = []
 
         self.progress_dialog.startProgress('Scanning found items', num_items)
         logger.debug('============================== Processing ROMs ==============================')
@@ -210,7 +216,7 @@ class RomFolderScanner(RomScannerStrategy):
         scanner_multidisc = self.supports_multidisc()
 
         for candidate in sorted(candidates, key=lambda c: c.get_sort_value()):
-            file_candidate:ROMFileCandidate = candidate
+            file_candidate: ROMFileCandidate = candidate
             ROM_file = file_candidate.file
             
             self.progress_dialog.updateProgress(num_items_checked)
@@ -233,7 +239,7 @@ class RomFolderScanner(RomScannerStrategy):
                     processROM = True
                     break
 
-            if not processROM: 
+            if not processROM:
                 launcher_report.write('  File has not an expected extension. Skipping file.')
                 continue
                         
@@ -256,8 +262,8 @@ class RomFolderScanner(RomScannerStrategy):
                 for new_rom in new_roms:
                     temp_FN = new_rom.get_scanned_data_element_as_file('file')
                     if temp_FN.getBase() == MDSet.setName:
-                        MultiDiscInROMs  = True
-                        MultiDisc_rom    = new_rom
+                        MultiDiscInROMs = True
+                        MultiDisc_rom = new_rom
                         break
 
                 logger.info('MultiDiscInROMs is {0}'.format(MultiDiscInROMs))
@@ -288,11 +294,11 @@ class RomFolderScanner(RomScannerStrategy):
  
             # --- Check that ROM is not already in the list of ROMs ---
             # >> If file already in ROM list skip it
-            self.progress_dialog.updateMessage('{}\nChecking if ROM is not already in collection...'.format(file_text))
+            self.progress_dialog.updateMessage('{}\nChecking if ROM is not already in library...'.format(file_text))
             repeatedROM = False
             for rom in roms:
                 rpath = rom.get_scanned_data_element_as_file('file')
-                if rpath == ROM_file: 
+                if rpath == ROM_file:
                     repeatedROM = True
         
             if repeatedROM:
@@ -304,15 +310,15 @@ class RomFolderScanner(RomScannerStrategy):
             # --- Ignore BIOS ROMs ---
             # Name of bios is: '[BIOS] Rom name example (Rev A).zip'
             if self.ignore_bios:
-                BIOS_re = re.findall('\[BIOS\]', ROM_file.getBase())
+                BIOS_re = re.findall(r'\[BIOS\]', ROM_file.getBase())
                 if len(BIOS_re) > 0:
-                    logger.info("BIOS detected. Skipping ROM '{0}'".format(ROM_file.getPath()))
+                    logger.info(f"BIOS detected. Skipping ROM '{ROM_file.getPath()}'")
                     continue
 
             # ~~~~~ Process new ROM and add to the list ~~~~~
             # --- Create new rom dictionary ---
             # >> Database always stores the original (non transformed/manipulated) path
-            new_rom = file_candidate.get_ROM()                                       
+            new_rom = file_candidate.get_ROM()
             new_roms.append(new_rom)
             
             # ~~~ Check if user pressed the cancel button ~~~
@@ -326,5 +332,3 @@ class RomFolderScanner(RomScannerStrategy):
            
         self.progress_dialog.endProgress()
         return new_roms
-
-             
