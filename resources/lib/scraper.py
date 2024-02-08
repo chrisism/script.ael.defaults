@@ -21,11 +21,11 @@ import logging
 
 # --- AKL packages ---
 from akl import constants, settings
-from akl.utils import kodi
 from akl.scrapers import Scraper
 from akl.api import ROMObj
 
 logger = logging.getLogger(__name__)
+
 
 # ------------------------------------------------------------------------------------------------
 # Local files scraper.
@@ -48,31 +48,44 @@ class LocalFilesScraper(Scraper):
         super(LocalFilesScraper, self).__init__(cache_dir)
 
     # --- Base class abstract methods ------------------------------------------------------------
-    def get_name(self): return 'Local files scraper'
+    def get_name(self):
+        return 'Local files scraper'
 
-    def get_filename(self): return 'Local_files'
+    def get_filename(self):
+        return 'Local_files'
 
-    def supports_disk_cache(self): return False
+    def supports_disk_cache(self):
+        return False
 
-    def supports_search_string(self): return False
+    def supports_search_string(self):
+        return False
 
     def supports_metadata_ID(self, metadata_ID):
         return metadata_ID in LocalFilesScraper.supported_metadata_list
 
-    def supports_metadata(self): return True
+    def supports_metadata(self):
+        return True
 
-    def supports_asset_ID(self, asset_ID): return True
+    def supports_asset_ID(self, asset_ID):
+        return True
 
-    def supports_assets(self): return True
+    def supports_assets(self):
+        return True
 
-    def check_before_scraping(self, status_dic): return status_dic
+    def check_before_scraping(self, status_dic):
+        return status_dic
 
-    def get_candidates(self, search_term, rom: ROMObj, platform, status_dic): return []
+    def get_candidates(self, search_term, rom: ROMObj, platform, status_dic):
+        return []
 
-    def get_metadata(self, status_dic): return self._new_gamedata_dic()
+    def get_metadata(self, status_dic):
+        return self._new_gamedata_dic()
 
-    def get_assets(self, asset_info, status_dic): return []
+    def get_assets(self, asset_info, status_dic):
+        return []
 
-    def resolve_asset_URL(self, selected_asset, status_dic): pass
+    def resolve_asset_URL(self, selected_asset, status_dic):
+        pass
 
-    def resolve_asset_URL_extension(self, selected_asset, image_url, status_dic): pass
+    def resolve_asset_URL_extension(self, selected_asset, image_url, status_dic):
+        pass
