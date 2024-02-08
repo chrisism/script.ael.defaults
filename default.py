@@ -151,7 +151,7 @@ def configure_launcher(args):
 # ---------------------------------------------------------------------------------------------
 # Scanner methods.
 # ---------------------------------------------------------------------------------------------
-# Arguments: --akl_addon_id --library_id --server_host --server_port
+# Arguments: --library_id --server_host --server_port
 def scan_for_roms(args):
     logger.debug('ROM Folder scanner: Starting scan ...')
     progress_dialog = kodi.ProgressDialog()
@@ -161,7 +161,6 @@ def scan_for_roms(args):
             
     scanner = RomFolderScanner(
         report_path,
-        args.akl_addon_id,
         args.library_id if args.library_id else args.romcollection_id,
         args.server_host,
         args.server_port,
@@ -174,20 +173,20 @@ def scan_for_roms(args):
     
     amount_dead = scanner.amount_of_dead_roms()
     if amount_dead > 0:
-        logger.info('scan_for_roms(): {} roms marked as dead'.format(amount_dead))
+        logger.info(f'scan_for_roms(): {amount_dead} roms marked as dead')
         scanner.remove_dead_roms()
         
     amount_scanned = scanner.amount_of_scanned_roms()
     if amount_scanned == 0:
         logger.info('scan_for_roms(): No roms scanned')
     else:
-        logger.info('scan_for_roms(): {} roms scanned'.format(amount_scanned))
+        logger.info(f'scan_for_roms(): {amount_scanned} roms scanned')
         scanner.store_scanned_roms()
         
     kodi.notify('ROMs scanning done')
 
 
-# Arguments: --akl_addon_id (opt) --library_id
+# Arguments: --library_id
 def configure_scanner(args):
     logger.debug('ROM Folder scanner: Configuring ...')
     addon_dir = kodi.getAddonDir()

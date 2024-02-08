@@ -186,11 +186,11 @@ class RomFolderScanner(RomScannerStrategy):
         self.progress_dialog.startProgress('Checking for dead ROMs ...', num_roms)
         for rom in reversed(roms):
             fileName = rom.get_scanned_data_element_as_file('file')
-            logger.info('Searching {0}'.format(fileName.getPath()))
+            logger.info(f'Searching {fileName.getPath()}')
             self.progress_dialog.updateProgress(i)
             
             if not fileName.exists():
-                logger.info('Not found. Marking as dead: {0}'.format(fileName.getPath()))
+                logger.info(f'Not found. Marking as dead: {fileName.getPath()}')
                 roms.remove(rom)
                 dead_roms.append(rom)
             i += 1
@@ -226,10 +226,10 @@ class RomFolderScanner(RomScannerStrategy):
 
             # ~~~ Update progress dialog ~~~
             file_text = f'ROM {ROM_file.getBase()}'
-            self.progress_dialog.updateMessage('{}\nChecking if has ROM extension ...'.format(file_text))
+            self.progress_dialog.updateMessage(f'{file_text}\nChecking if has ROM extension ...')
                         
             # --- Check if filename matchs ROM extensions ---
-            # The recursive scan has scanned all files. Check if this file matches some of 
+            # The recursive scan has scanned all files. Check if this file matches some of
             # the ROM extensions. If this file isn't a ROM skip it and go for next one in the list.
             processROM = False
 
