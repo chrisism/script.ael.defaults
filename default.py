@@ -119,7 +119,6 @@ def launch_rom(args):
         executor_factory = get_executor_factory(report_path)
         launcher = AppLauncher(
             args.akl_addon_id,
-            args.romcollection_id,
             args.rom_id,
             args.server_host,
             args.server_port,
@@ -138,7 +137,6 @@ def configure_launcher(args):
         
     launcher = AppLauncher(
         args.akl_addon_id,
-        args.romcollection_id,
         args.rom_id,
         args.server_host,
         args.server_port)
