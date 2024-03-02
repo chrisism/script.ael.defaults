@@ -90,7 +90,7 @@ class RomFolderScanner(RomScannerStrategy):
         wizard = kodi.WizardDialog_Dummy(wizard, 'romext', '', self.configuration_get_extensions_from_launchers)
         wizard = kodi.WizardDialog_Keyboard(wizard, 'romext', 'Set files extensions, use "|" as separator. (e.g lnk|cbr)')
         wizard = kodi.WizardDialog_YesNo(wizard, 'multidisc',
-                                         'Supports multi-disc ROMs?', 'Does this library contain multi-disc ROMS?')
+                                         'Supports multi-disc ROMs?', 'Does this source contain multi-disc ROMS?')
         wizard = kodi.WizardDialog_YesNo(wizard, 'ignore_bios', 'Ignore BIOS', 'Ignore any BIOS file found during scanning?')
         
         return wizard
@@ -177,7 +177,7 @@ class RomFolderScanner(RomScannerStrategy):
         dead_roms = []
         num_roms = len(roms)
         if num_roms == 0:
-            logger.info('Library is empty. No dead ROM check.')
+            logger.info('Source is empty. No dead ROM check.')
             return dead_roms
         
         logger.info('Starting dead items scan')
@@ -294,7 +294,7 @@ class RomFolderScanner(RomScannerStrategy):
  
             # --- Check that ROM is not already in the list of ROMs ---
             # >> If file already in ROM list skip it
-            self.progress_dialog.updateMessage('{}\nChecking if ROM is not already in library...'.format(file_text))
+            self.progress_dialog.updateMessage('{}\nChecking if ROM is not already in source...'.format(file_text))
             repeatedROM = False
             for rom in roms:
                 rpath = rom.get_scanned_data_element_as_file('file')

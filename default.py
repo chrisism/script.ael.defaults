@@ -64,9 +64,9 @@ def run_plugin():
     parser.add_argument('--server_port', type=int, help="Port")
     parser.add_argument('--rom_id', type=str, help="ROM ID")
     parser.add_argument('--romcollection_id', type=str, help="ROM Collection ID")
-    parser.add_argument('--library_id', type=str, help="Library ID")
+    parser.add_argument('--source_id', type=str, help="Source ID")
     parser.add_argument('--entity_id', type=str, help="Entity ID")
-    parser.add_argument('--entity_type', type=str, help="Entity Type (ROM|ROMCOLLECTION|LIBRARY)")
+    parser.add_argument('--entity_type', type=str, help="Entity Type (ROM|ROMCOLLECTION|SOURCE)")
     parser.add_argument('--akl_addon_id', type=str, help="Addon configuration ID")
     parser.add_argument('--settings', type=json.loads, help="Specific run setting")
     
@@ -151,7 +151,7 @@ def configure_launcher(args):
 # ---------------------------------------------------------------------------------------------
 # Scanner methods.
 # ---------------------------------------------------------------------------------------------
-# Arguments: --library_id --server_host --server_port
+# Arguments: --source_id --server_host --server_port
 def scan_for_roms(args):
     logger.debug('ROM Folder scanner: Starting scan ...')
     progress_dialog = kodi.ProgressDialog()
@@ -161,7 +161,7 @@ def scan_for_roms(args):
             
     scanner = RomFolderScanner(
         report_path,
-        args.library_id if args.library_id else args.romcollection_id,
+        args.source_id if args.source_id else args.romcollection_id,
         args.server_host,
         args.server_port,
         progress_dialog)
@@ -186,7 +186,7 @@ def scan_for_roms(args):
     kodi.notify('ROMs scanning done')
 
 
-# Arguments: --library_id
+# Arguments: --source_id
 def configure_scanner(args):
     logger.debug('ROM Folder scanner: Configuring ...')
     addon_dir = kodi.getAddonDir()
@@ -194,7 +194,7 @@ def configure_scanner(args):
     
     scanner = RomFolderScanner(
         report_path,
-        args.library_id if args.library_id else args.romcollection_id,
+        args.source_id if args.source_id else args.romcollection_id,
         args.server_host,
         args.server_port,
         kodi.ProgressDialog())
