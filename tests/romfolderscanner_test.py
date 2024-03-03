@@ -31,7 +31,7 @@ class Test_romscannerstests(unittest.TestCase):
         print('TEST ASSETS DIR: {}'.format(cls.TEST_ASSETS_DIR))
         print('---------------------------------------------------------------------------')
     
-    @patch('akl.api.client_get_collection_scanner_settings')
+    @patch('akl.api.client_get_source_scanner_settings')
     @patch('resources.lib.scanner.io.FileName.recursiveScanFilesInPath')
     def test_when_scanning_with_a_normal_rom_scanner_it_will_go_without_exceptions(self, recursive_scan_mock:MagicMock, api_settings_mock:MagicMock):
         
@@ -49,7 +49,7 @@ class Test_romscannerstests(unittest.TestCase):
         }
         
         report_dir = FakeFile('//fake_reports/')
-        target = RomFolderScanner(report_dir, random_string(10), random_string(10), None, 0, FakeProgressDialog())
+        target = RomFolderScanner(report_dir, random_string(10), None, 0, FakeProgressDialog())
         
         # act
         target.scan()
@@ -58,8 +58,8 @@ class Test_romscannerstests(unittest.TestCase):
         print(report_dir.getFakeContent())
     
     @patch('resources.lib.scanner.io.FileName.exists_python',autospec=True)   
-    @patch('akl.api.client_get_roms_in_collection')
-    @patch('akl.api.client_get_collection_scanner_settings')
+    @patch('akl.api.client_get_roms_in_source')
+    @patch('akl.api.client_get_source_scanner_settings')
     @patch('resources.lib.scanner.io.FileName.recursiveScanFilesInPath')
     def test_when_scanning_with_a_normal_rom_scanner_dead_roms_will_be_removed(self, 
             recursive_scan_mock:MagicMock, api_settings_mock:MagicMock, api_roms_mock:MagicMock, file_exists_mock:MagicMock):
@@ -88,7 +88,7 @@ class Test_romscannerstests(unittest.TestCase):
         expected = 3
 
         # act
-        target = RomFolderScanner(report_dir, scanner_id, random_string(10), None, 0, FakeProgressDialog())
+        target = RomFolderScanner(report_dir, scanner_id, None, 0, FakeProgressDialog())
         target.scan()
 
         # assert
@@ -96,8 +96,8 @@ class Test_romscannerstests(unittest.TestCase):
         print(report_dir.getFakeContent())
     
     @patch('resources.lib.scanner.io.FileName.exists_python', autospec=True)    
-    @patch('akl.api.client_get_roms_in_collection')
-    @patch('akl.api.client_get_collection_scanner_settings')
+    @patch('akl.api.client_get_roms_in_source')
+    @patch('akl.api.client_get_source_scanner_settings')
     @patch('resources.lib.scanner.io.FileName.recursiveScanFilesInPath')
     def test_when_scanning_with_a_normal_rom_scanner_multidiscs_will_be_put_together(self, 
             recursive_scan_mock:MagicMock, api_settings_mock:MagicMock, api_roms_mock:MagicMock, file_exists_mock:MagicMock):
@@ -122,7 +122,7 @@ class Test_romscannerstests(unittest.TestCase):
         
         file_exists_mock.side_effect = lambda f: f.getPath().startswith('//fake/')
         report_dir = FakeFile('//fake_reports/')        
-        target = RomFolderScanner(report_dir, scanner_id, random_string(10), None, 0, FakeProgressDialog())
+        target = RomFolderScanner(report_dir, scanner_id, None, 0, FakeProgressDialog())
         
         expected = 4
 
@@ -140,8 +140,8 @@ class Test_romscannerstests(unittest.TestCase):
         self.assertEqual(expected, target.amount_of_scanned_roms())
     
     @patch('resources.lib.scanner.io.FileName.exists_python', autospec=True)    
-    @patch('akl.api.client_get_roms_in_collection')
-    @patch('akl.api.client_get_collection_scanner_settings')
+    @patch('akl.api.client_get_roms_in_source')
+    @patch('akl.api.client_get_source_scanner_settings')
     @patch('resources.lib.scanner.io.FileName.recursiveScanFilesInPath')
     def test_when_scanning_with_a_normal_rom_scanner_existing_items_wont_end_up_double(self, 
             recursive_scan_mock:MagicMock, api_settings_mock:MagicMock, api_roms_mock:MagicMock, file_exists_mock:MagicMock):        
@@ -166,7 +166,7 @@ class Test_romscannerstests(unittest.TestCase):
         
         file_exists_mock.side_effect = lambda f: f.getPath().startswith('//fake/')
         report_dir = FakeFile('//fake_reports/')        
-        target = RomFolderScanner(report_dir, scanner_id, random_string(10), None, 0, FakeProgressDialog())
+        target = RomFolderScanner(report_dir, scanner_id, None, 0, FakeProgressDialog())
         
         expected = 1 # only donkey kong.zip is new
 
@@ -184,8 +184,8 @@ class Test_romscannerstests(unittest.TestCase):
         self.assertEqual(expected, target.amount_of_scanned_roms())
         
     @patch('resources.lib.scanner.io.FileName.exists_python', autospec=True)    
-    @patch('akl.api.client_get_roms_in_collection')
-    @patch('akl.api.client_get_collection_scanner_settings')
+    @patch('akl.api.client_get_roms_in_source')
+    @patch('akl.api.client_get_source_scanner_settings')
     @patch('resources.lib.scanner.io.FileName.recursiveScanFilesInPath')
     def test_when_scanning_with_a_normal_rom_scanner_and_bios_roms_must_be_skipped_they_wont_be_added(self,
             recursive_scan_mock:MagicMock, api_settings_mock:MagicMock, api_roms_mock:MagicMock, file_exists_mock:MagicMock):
@@ -211,7 +211,7 @@ class Test_romscannerstests(unittest.TestCase):
         
         file_exists_mock.side_effect = lambda f: f.getPath().startswith('//fake/')
         report_dir = FakeFile('//fake_reports/')        
-        target = RomFolderScanner(report_dir, scanner_id, random_string(10), None, 0, FakeProgressDialog())
+        target = RomFolderScanner(report_dir, scanner_id, None, 0, FakeProgressDialog())
         
         expected = 1 # donkey kong.zip is only new ROM
 

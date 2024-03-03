@@ -49,7 +49,7 @@ class Test_Launcher(unittest.TestCase):
     @patch('akl.launchers.kodi', autospec=True)
     @patch('akl.utils.io.FileName', side_effect = FakeFile)
     @patch('akl.api.client_get_rom')
-    @patch('akl.api.client_get_collection_launcher_settings')
+    @patch('akl.api.client_get_launcher_settings')
     @patch('akl.executors.ExecutorFactory')
     def test_if_app_launcher_will_correctly_passthrough_parameters_when_launching(self, 
             factory_mock:MagicMock, api_settings_mock:MagicMock, api_rom_mock: MagicMock, filename_mock, kodi_mock):
@@ -61,7 +61,7 @@ class Test_Launcher(unittest.TestCase):
         launcher_id     = random_string(10)
         collection_id   = random_string(10)
         rom_id          = random_string(10)
-
+        
         mock = FakeExecutor()
         factory_mock.create.return_value = mock
         
@@ -80,7 +80,7 @@ class Test_Launcher(unittest.TestCase):
         api_rom_mock.return_value = expected_rom
 
         # act
-        target = AppLauncher(launcher_id, collection_id, None, 'localhost', 8080, factory_mock, ExecutionSettings())
+        target = AppLauncher(launcher_id, None, 'localhost', 8080, factory_mock, ExecutionSettings())
         target.launch()
 
         # assert
@@ -92,7 +92,7 @@ class Test_Launcher(unittest.TestCase):
     @patch('akl.launchers.kodi', autospec=True)
     @patch('akl.utils.io.FileName', side_effect = FakeFile)
     @patch('akl.api.client_get_rom')
-    @patch('akl.api.client_get_collection_launcher_settings')
+    @patch('akl.api.client_get_launcher_settings')
     @patch('akl.executors.ExecutorFactory')    
     def test_if_app_launcher_will_correctly_alter_arguments_when_launching(self, 
             factory_mock:MagicMock, api_settings_mock:MagicMock, api_rom_mock: MagicMock, filename_mock, kodi_mock):
@@ -111,9 +111,8 @@ class Test_Launcher(unittest.TestCase):
         launcher_settings['display_launcher_notify'] = False
         api_settings_mock.return_value = launcher_settings
         
-        launcher_id     = random_string(10)
-        collection_id   = random_string(10)
-        rom_id          = random_string(10)
+        launcher_id = random_string(10)
+        rom_id = random_string(10)
 
         expected_rom = ROMObj({
             'id': rom_id,
@@ -125,7 +124,7 @@ class Test_Launcher(unittest.TestCase):
         factory_mock.create.return_value = mock
 
         # act
-        target = AppLauncher(launcher_id, collection_id, None, 'localhost', 8080, factory_mock, ExecutionSettings())
+        target = AppLauncher(launcher_id, None, 'localhost', 8080, factory_mock, ExecutionSettings())
         target.launch()
 
         # assert
@@ -137,7 +136,7 @@ class Test_Launcher(unittest.TestCase):
     @patch('akl.launchers.kodi', autospec=True)
     @patch('akl.utils.io.FileName', side_effect = FakeFile)
     @patch('akl.api.client_get_rom')
-    @patch('akl.api.client_get_collection_launcher_settings')
+    @patch('akl.api.client_get_launcher_settings')
     @patch('akl.executors.ExecutorFactory')    
     def test_if_rom_launcher_will_correctly_passthrough_the_application_when_launching(self, 
             factory_mock:MagicMock, api_settings_mock:MagicMock, api_rom_mock: MagicMock, filename_mock, kodi_mock):
@@ -156,9 +155,8 @@ class Test_Launcher(unittest.TestCase):
         launcher_settings['roms_base_noext'] = 'snes'
         api_settings_mock.return_value = launcher_settings
         
-        launcher_id     = random_string(10)
-        collection_id   = random_string(10)
-        rom_id          = random_string(10)
+        launcher_id = random_string(10)
+        rom_id = random_string(10)
         
         expected_rom = ROMObj({ 'id': rom_id, 'm_name': 'TestCase', 'scanned_data': {'file':'testing.zip'}, 'altapp': '', 'altarg': '' })
         api_rom_mock.return_value = expected_rom
@@ -167,7 +165,7 @@ class Test_Launcher(unittest.TestCase):
         factory_mock.create.return_value = mock
 
         # act
-        target = AppLauncher(launcher_id, collection_id, None, 'localhost', 8080, factory_mock, ExecutionSettings())
+        target = AppLauncher(launcher_id, None, 'localhost', 8080, factory_mock, ExecutionSettings())
         target.launch()       
 
         # assert
