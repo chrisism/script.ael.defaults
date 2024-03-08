@@ -49,7 +49,7 @@ class AppLauncher(LauncherABC):
     #
     # Creates a new launcher using a wizard of dialogs. Called by parent build() method.
     #
-    def _builder_get_wizard(self, wizard):    
+    def _builder_get_wizard(self, wizard):
         wizard = kodi.WizardDialog_FileBrowse(wizard, 'application', 'Select the launcher application',
                                               1, self._builder_get_appbrowser_filter, shares="programs")
         wizard = kodi.WizardDialog_Dummy(wizard, 'args', '', self._builder_get_arguments_from_application_path)
@@ -75,7 +75,7 @@ class AppLauncher(LauncherABC):
         return default_arguments
     
     def _builder_get_edit_options(self):
-        options = collections.OrderedDict()
+        options = super()._builder_get_edit_options()
         options[self._change_application] = 'Change application ({})'.format(self.launcher_settings['application'])
         options[self._change_launcher_arguments] = "Modify Arguments: '{0}'".format(self.launcher_settings['args'])
         return options

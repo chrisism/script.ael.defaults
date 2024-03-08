@@ -40,20 +40,15 @@ addon_version = addon.getAddonInfo('version')
 # This is the plugin entry point.
 # ---------------------------------------------------------------------------------------------
 def run_plugin():
+    os_name = io.is_which_os()
+    
     # --- Some debug stuff for development ---
     logger.info('------------ Called Advanced Kodi Launcher Plugin: Default plugins ------------')
     logger.info(f'addon.id         "{addon_id}"')
     logger.info(f'addon.version    "{addon_version}"')
     logger.info(f'sys.platform     "{sys.platform}"')
-    if io.is_android():
-        logger.info('OS               "Android"')
-    if io.is_windows():
-        logger.info('OS               "Windows"')
-    if io.is_osx():
-        logger.info('OS               "OSX"')
-    if io.is_linux():
-        logger.info('OS               "Linux"')
-
+    logger.info(f'OS               "{os_name}"')
+    
     for i in range(len(sys.argv)):
         logger.info('sys.argv[{}] "{}"'.format(i, sys.argv[i]))
 
