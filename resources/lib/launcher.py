@@ -50,8 +50,12 @@ class AppLauncher(LauncherABC):
     # Creates a new launcher using a wizard of dialogs. Called by parent build() method.
     #
     def _builder_get_wizard(self, wizard):
+        wizard = kodi.WizardDialog_DictionarySelection(wizard, 'application', 'Select the way to launch the files', {
+            'APP': 'Using a specific application to launch',
+            'FILE': 'Directly execute the file itself'})
         wizard = kodi.WizardDialog_FileBrowse(wizard, 'application', 'Select the launcher application',
-                                              1, self._builder_get_appbrowser_filter, shares="programs")
+                                              1, self._builder_get_appbrowser_filter, shares="programs",
+                                              conditionalFunction=self._builder_will_launch_through_app)
         wizard = kodi.WizardDialog_Dummy(wizard, 'args', '', self._builder_get_arguments_from_application_path)
         wizard = kodi.WizardDialog_Keyboard(wizard, 'args', 'Application arguments')
         
@@ -73,7 +77,10 @@ class AppLauncher(LauncherABC):
         default_arguments = platforms.emudata_get_program_arguments(appPath.getBase())
 
         return default_arguments
-    
+
+    def _builder_will_launch_through_app(self, item_key, properties) -> bool:
+        return not properties[item_key] != 'FILE'
+        
     def _builder_get_edit_options(self):
         options = super()._builder_get_edit_options()
         options[self._change_application] = 'Change application ({})'.format(self.launcher_settings['application'])
@@ -82,11 +89,21 @@ class AppLauncher(LauncherABC):
 
     def _change_application(self):
         current_application = self.launcher_settings['application']
-        selected_application = kodi.browse(1, 'Select the launcher application', 'files',
-                                           '', False, False, current_application)
-
-        if selected_application is None or selected_application == current_application:
-            return
+        
+        options = collections.OrderedDict()
+        options['APP'] = 'Using a specific application to launch'
+        options['FILE'] = 'Directly execute the file itself'
+        
+        preselected = current_application if current_application == 'FILE' else 'APP'
+        selected_option = kodi.OrdDictionaryDialog().select('Select the way to launch the files', options, preselected)
+        
+        if selected_option == 'APP':
+            selected_application = kodi.browse(1, 'Select the launcher application', 'files',
+                                               '', False, False, current_application)
+            if selected_application is None or selected_application == current_application:
+                return
+        else:
+            selected_application = selected_option
         
         self.launcher_settings['application'] = selected_application
 
@@ -103,8 +120,11 @@ class AppLauncher(LauncherABC):
     # ---------------------------------------------------------------------------------------------
     def get_application(self) -> str:
         if 'application' not in self.launcher_settings:
-            logger.error('LauncherABC::launch() No application argument defined')            
+            logger.error('LauncherABC::launch() No application argument defined')
             return None
+        
+        if self.launcher_settings['application'] == 'FILE':
+            return "$ROM$"
         
         application = io.FileName(self.launcher_settings['application'])
         
