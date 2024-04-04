@@ -79,7 +79,7 @@ class AppLauncher(LauncherABC):
         return default_arguments
 
     def _builder_will_launch_through_app(self, item_key, properties) -> bool:
-        return not properties[item_key] != 'FILE'
+        return properties[item_key] != 'FILE'
         
     def _builder_get_edit_options(self):
         options = super()._builder_get_edit_options()
