@@ -73,6 +73,9 @@ class AppLauncher(LauncherABC):
         if input:
             return input
         app = launcher_args['application']
+        if app == 'FILE':
+            return ''
+        
         appPath = io.FileName(app)
         default_arguments = platforms.emudata_get_program_arguments(appPath.getBase())
 
