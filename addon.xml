@@ -9,10 +9,7 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary lang="en_GB">Default plugins for AKL.</summary>
-    <description lang="en_GB">
-    Default plugins for AKL. Needed to have basic functionality with AKL. Supports scanning directories for certain files.
-    Launching these files using selected applications.
-    </description>
+    <description lang="en_GB">Default plugins for AKL. Needed to have basic functionality with AKL. Supports scanning directories for certain files. Launching these files using selected applications.</description>
     <platform>all</platform>
     <license>GNU General Public License version 2</license>
     <email>crizizz@gmail.com</email>
