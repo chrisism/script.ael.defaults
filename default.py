@@ -198,7 +198,8 @@ def run_scraper(args: addons.AklAddonArguments):
     settings.search_term_mode = constants.SCRAPE_AUTOMATIC
     settings.game_selection_mode = constants.SCRAPE_AUTOMATIC
     settings.asset_selection_mode = constants.SCRAPE_AUTOMATIC
-    settings.overwrite_existing = constants.SCRAPE_AUTOMATIC
+    settings.overwrite_existing_assets = constants.SCRAPE_AUTOMATIC
+    settings.overwrite_existing_meta = constants.SCRAPE_AUTOMATIC
     
     if settings.scrape_metadata_policy != constants.SCRAPE_ACTION_NONE:
         settings.scrape_metadata_policy = constants.SCRAPE_POLICY_LOCAL_ONLY
@@ -222,9 +223,9 @@ def run_scraper(args: addons.AklAddonArguments):
         scraped_roms = scraper_strategy.process_roms(args.get_entity_type(), args.get_entity_id())
         pdialog.endProgress()
         pdialog.startProgress('Saving ROMs in database ...')
-        scraper_strategy.store_scraped_roms(args.get_akl_addon_id(), 
-                                            args.get_entity_type(), 
-                                            args.get_entity_id(), 
+        scraper_strategy.store_scraped_roms(args.get_akl_addon_id(),
+                                            args.get_entity_type(),
+                                            args.get_entity_id(),
                                             scraped_roms)
         pdialog.endProgress()
         
