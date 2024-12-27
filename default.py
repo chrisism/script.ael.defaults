@@ -193,7 +193,7 @@ def configure_scanner(args: addons.AklAddonArguments):
 def run_scraper(args: addons.AklAddonArguments):
     logger.debug('========== Local files.run_scraper() BEGIN ==================================================')
     pdialog = kodi.ProgressDialog()
-    settings = ScraperSettings.from_settings_dict(args.settings)
+    settings = ScraperSettings.from_settings_dict(args.get_settings())
     # OVERRIDES
     settings.search_term_mode = constants.SCRAPE_AUTOMATIC
     settings.game_selection_mode = constants.SCRAPE_AUTOMATIC
